@@ -1,0 +1,383 @@
+/* Custom styles for Workflow Process Page */
+
+/* Workflow Header */
+.workflow-header {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.workflow-title {
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.workflow-description {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    color: #555;
+}
+
+/* Progress Tracker */
+.progress-tracker {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 3rem 2rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.progress-tracker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(45deg, #9370DB, #FF6B6B, #FF8C00);
+    border-radius: 15px 15px 0 0;
+}
+
+.progress-header h3 {
+    color: #374151;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.progress-header p {
+    color: #555;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.progress-timeline {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    overflow-x: auto;
+    padding: 2rem 0;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+/* Modern connecting line between steps - connects through center of circles */
+.progress-timeline::before {
+    content: '';
+    position: absolute;
+    top: 60px; /* Center of 60px circles (30px from top) + 2rem padding */
+    left: 5%;
+    right: 5%;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        rgba(79, 70, 229, 0.2) 0%, 
+        rgba(147, 51, 234, 0.2) 50%, 
+        rgba(236, 72, 153, 0.2) 100%);
+    border-radius: 2px;
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 180px;
+    position: relative;
+    opacity: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+.progress-step:hover {
+    transform: translateY(-5px);
+}
+
+.progress-step.active .step-indicator {
+    transform: scale(1.1);
+}
+
+.progress-step.completed .step-indicator {
+    transform: scale(1.05);
+}
+
+.step-indicator {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(248, 250, 252, 0.9) 100%);
+    border: 4px solid rgba(203, 213, 225, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 3;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.step-indicator::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, transparent 0%, transparent 100%);
+    z-index: -1;
+    transition: all 0.4s ease;
+}
+
+.progress-step.active .step-indicator {
+    background: linear-gradient(45deg, #8B5CF6, #F87171);
+    border-color: #8B5CF6;
+    box-shadow: 
+        0 0 25px rgba(139, 92, 246, 0.4),
+        0 8px 24px rgba(139, 92, 246, 0.2);
+    transform: scale(1.1);
+}
+
+.progress-step.active .step-indicator::before {
+    background: linear-gradient(45deg, 
+        rgba(139, 92, 246, 0.3) 0%, 
+        rgba(248, 113, 113, 0.3) 100%);
+}
+
+.progress-step.completed .step-indicator {
+    background: linear-gradient(45deg, #F87171, #FF8C00);
+    border-color: #F87171;
+    box-shadow: 
+        0 0 20px rgba(248, 113, 113, 0.4),
+        0 6px 20px rgba(248, 113, 113, 0.2);
+    transform: scale(1.05);
+}
+
+.progress-step.completed .step-indicator::before {
+    background: linear-gradient(45deg, 
+        rgba(248, 113, 113, 0.3) 0%, 
+        rgba(255, 140, 0, 0.3) 100%);
+}
+
+.step-number {
+    color: #6B7280;
+    font-weight: 700;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.progress-step.active .step-number,
+.progress-step.completed .step-number {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.step-content {
+    color: #555;
+    transition: all 0.3s ease;
+}
+
+.progress-step:hover .step-content {
+    transform: translateY(-2px);
+}
+
+.step-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+    color: #1F2937;
+    transition: color 0.3s ease;
+}
+
+.progress-step.active .step-title {
+    color: #4F46E5;
+}
+
+.progress-step.completed .step-title {
+    color: #059669;
+}
+
+.step-description {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+    line-height: 1.4;
+    color: #6B7280;
+    transition: all 0.3s ease;
+}
+
+.progress-step:hover .step-description {
+    color: #374151;
+}
+
+/* Action Buttons - Clean and Subtle Design */
+.action-buttons .btn {
+    min-width: 150px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid;
+}
+
+.action-buttons .btn-primary {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+.action-buttons .btn-primary:hover {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.action-buttons .btn-success {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.action-buttons .btn-success:hover {
+    background: #059669;
+    border-color: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Status Badges */
+.badge.bg-success {
+    background: linear-gradient(45deg, #F87171, #FF8C00) !important;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(45deg, #8B5CF6, #F87171) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(135deg, #6B7280, #4B5563) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .workflow-header {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .progress-tracker {
+        padding: 2rem 1rem;
+    }
+    
+    .progress-timeline {
+        flex-direction: column;
+        align-items: center;
+        gap: 3rem;
+        padding: 2rem 0;
+    }
+    
+    .progress-timeline::before {
+        content: '';
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        right: auto;
+        width: 4px;
+        height: calc(100% - 120px);
+        background: linear-gradient(180deg, 
+            rgba(79, 70, 229, 0.2) 0%, 
+            rgba(147, 51, 234, 0.2) 50%, 
+            rgba(236, 72, 153, 0.2) 100%);
+        transform: translateX(-50%);
+        border-radius: 2px;
+    }
+    
+    .progress-step {
+        max-width: 100%;
+        margin-bottom: 0;
+        margin-right: 0;
+        min-width: 280px;
+    }
+    
+    .action-buttons {
+        padding: 1.5rem;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .action-buttons .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .progress-tracker,
+    .action-buttons {
+        padding: 1.5rem 1rem;
+    }
+    
+    .workflow-header {
+        padding: 1rem;
+    }
+    
+    .step-indicator {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .step-number {
+        font-size: 1.1rem;
+    }
+    
+    .step-title {
+        font-size: 0.9rem;
+    }
+    
+    .step-description {
+        font-size: 0.8rem;
+    }
+    
+    .progress-step {
+        min-width: 250px;
+    }
+}
+
+/* Button Styles - Consistent with Prompt Evaluation */
+.btn-outline-primary {
+    border: 2px solid #8b5cf6;
+    color: #8b5cf6;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+}
