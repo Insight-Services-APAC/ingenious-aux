@@ -1,0 +1,672 @@
+/* Base Styles - Consistent with Main Theme */
+body {
+    background: linear-gradient(135deg, 
+        rgba(147, 112, 219, 0.15) 0%, 
+        rgba(255, 107, 107, 0.15) 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navigation */
+.navbar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.8rem;
+    background: linear-gradient(45deg, #9370DB, #FF6B6B, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.navbar-brand:hover {
+    opacity: 0.8;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+/* Header Section */
+.header-section {
+    color: #5a4fcf;
+    margin-bottom: 3rem;
+}
+
+.workflow-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #9370DB, #FF6B6B, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.workflow-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.7;
+    margin: 0;
+    color: #555;
+}
+
+/* Controls Section */
+.controls-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.revision-filter .form-label {
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.revision-filter .form-select {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.revision-filter .form-select:focus {
+    background: white;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
+}
+
+/* Action Buttons */
+.controls-section .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    letter-spacing: 0.25px;
+    text-transform: none;
+    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+    min-width: 160px;
+    justify-content: center;
+}
+
+.controls-section .btn::before {
+    display: none;
+}
+
+.controls-section .btn-primary {
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: #ffffff;
+}
+
+.controls-section .btn-primary:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+    transform: none;
+    color: #ffffff;
+}
+
+.controls-section .btn-success {
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: #ffffff;
+}
+
+.controls-section .btn-success:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+    transform: none;
+    color: #ffffff;
+}
+
+.controls-section .btn:active {
+    background: #6b7280;
+    transform: none;
+}
+
+.controls-section .btn i {
+    font-size: 1em;
+}
+
+/* Button Container */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.controls-section .col-md-6:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Prompt Cards */
+.prompts-grid {
+    min-height: 400px;
+}
+
+.prompt-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.prompt-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.prompt-card-header {
+    padding: 1.25rem 1.25rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.prompt-info {
+    flex: 1;
+}
+
+.prompt-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.revision-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.revision-v1 {
+    background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.revision-v2 {
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+}
+
+.revision-v3 {
+    background: linear-gradient(45deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.revision-v4 {
+    background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-archived {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Revision badge styling */
+.revision-badge-stacked {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: none;
+    background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+    color: white !important;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(236, 72, 153, 0.3);
+    letter-spacing: 0.4px;
+}
+
+.prompt-card-body {
+    padding: 0 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.prompt-details {
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.detail-item i {
+    width: 16px;
+    margin-right: 0.5rem;
+    color: #9ca3af;
+}
+
+.prompt-preview {
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.prompt-preview p {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.prompt-card-actions {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #e5e7eb;
+    background: rgba(249, 250, 251, 0.8);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.prompt-card-actions .btn {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.prompt-card-actions .dropdown-toggle::after {
+    margin-left: 0.255em;
+}
+
+/* No Prompts Message */
+.no-prompts {
+    color: #6b7280;
+    padding: 4rem 2rem;
+}
+
+.no-prompts i {
+    opacity: 0.3;
+    color: #9ca3af;
+}
+
+.no-prompts h3 {
+    margin-top: 1rem;
+    opacity: 0.8;
+    color: #374151;
+}
+
+.no-prompts p {
+    opacity: 0.6;
+}
+
+/* Footer */
+.footer {
+    background: rgba(255, 255, 255, 0.9);
+    color: #6b7280;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.footer p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .workflow-title {
+        font-size: 2rem;
+    }
+    
+    .workflow-subtitle {
+        font-size: 1rem;
+    }
+    
+    .controls-section {
+        padding: 1rem;
+    }
+    
+    .controls-section .row {
+        gap: 1rem;
+    }
+    
+    .controls-section .col-md-6:last-child {
+        text-align: center !important;
+        justify-content: center;
+    }
+
+    .action-buttons {
+        justify-content: center;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .controls-section .btn {
+        min-width: 140px;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .controls-section .btn span {
+        display: none;
+    }
+
+    .controls-section .btn i {
+        font-size: 1.2em;
+    }
+    
+    .prompt-card-actions {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    .prompt-card-actions .btn {
+        flex: 1;
+        min-width: 70px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        padding: 1rem 0;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .controls-section .btn {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .controls-section .btn span {
+        display: inline;
+    }
+
+    .controls-section .btn i {
+        margin-right: 8px;
+    }
+    
+    .prompt-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .prompt-card-actions {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.prompt-card {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.prompt-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.prompt-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.prompt-card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+/* View Prompt Modal Styles */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #8b5cf6, #f87171);
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.prompt-info-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.info-item {
+    margin-bottom: 0.75rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #374151;
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: #6b7280;
+    font-size: 0.875rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    display: block;
+}
+
+.prompt-content-section {
+    margin-top: 1.5rem;
+}
+
+.prompt-content-display {
+    background: #1f2937;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 0.5rem;
+    border: 1px solid #374151;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.prompt-content-display pre {
+    color: #e5e7eb;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.modal-footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+}
+
+.modal-footer .btn {
+    margin-left: 0.5rem;
+}
+
+/* Edit Prompt Modal Styles */
+#editPromptModal .modal-header {
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.edit-metadata-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.edit-content-section {
+    margin-top: 1rem;
+}
+
+.editor-tools {
+    display: flex;
+    align-items: center;
+}
+
+.prompt-editor-container {
+    position: relative;
+}
+
+.prompt-editor {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    padding: 1rem;
+    resize: vertical;
+    min-height: 400px;
+    transition: border-color 0.3s ease;
+}
+
+.prompt-editor:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    outline: none;
+}
+
+.prompt-editor::placeholder {
+    color: #64748b;
+    font-style: italic;
+}
+
+.editor-status {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+}
+
+.form-label.fw-bold {
+    color: #374151;
+    font-weight: 600;
+}
+
+/* Responsive adjustments for edit modal */
+@media (max-width: 768px) {
+    #editPromptModal .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .edit-metadata-section {
+        padding: 1rem;
+    }
+    
+    .prompt-editor {
+        min-height: 300px;
+        font-size: 0.8rem;
+    }
+    
+    .editor-tools {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+    
+    .editor-tools .btn {
+        font-size: 0.75rem;
+    }
+}
+
+/* Button Styles - Consistent with Prompt Evaluation */
+.btn-outline-primary {
+    border: 2px solid #8b5cf6;
+    color: #8b5cf6;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+}
