@@ -1,6 +1,7 @@
+// Workflow Process JavaScript with Alpine.js
+
 // Access API configuration
 const { baseUrl, endpoints } = window.API_CONFIG;
-
 
 // Alpine.js data for workflow process page
 function workflowProcessApp() {
@@ -53,10 +54,6 @@ function workflowProcessApp() {
             } catch (error) {
                 console.error('Error loading workflow details:', error);
                 this.error = error.message;
-                // Fallback to sample data if available
-                if (SAMPLE_WORKFLOWS[workflowId]) {
-                    this.workflow = SAMPLE_WORKFLOWS[workflowId];
-                }
             } finally {
                 this.loading = false;
             }
@@ -65,7 +62,7 @@ function workflowProcessApp() {
         // Get workflow info from the workflows API (same as used in workflow hub)
         async getWorkflowInfo(workflowId) {
             try {
-                const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.allWorkflows}`);
+                const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.workflows}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -90,27 +87,13 @@ function workflowProcessApp() {
                 
             } catch (error) {
                 console.error('Error fetching workflow info from API:', error);
-                // Fallback to sample workflows API data
-                const workflow = SAMPLE_WORKFLOWS_API.workflows.find(w => 
-                    w.workflow === workflowId || 
-                    w.supported_names?.includes(workflowId) ||
-                    w.workflow.replace(/-/g, '_') === workflowId ||
-                    w.workflow.replace(/_/g, '-') === workflowId
-                );
-                
-                if (workflow) {
-                    console.log('Using sample workflow info:', workflow);
-                    return workflow;
-                }
-                
-                throw error;
             }
         },
         
         // Load workflow agents from API
         async loadWorkflowAgents(workflowName) {
             try {
-                const apiUrl = `${WORKFLOW_API_CONFIG.baseUrl}${API_CONFIG.endpoints.workflowAgents.replace('{workflow-name}', workflowName)}`;
+                const apiUrl = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.workflowAgents.replace('{workflow-name}', workflowName)}`;
                 console.log('Attempting to fetch agents from:', apiUrl);
                 
                 const response = await fetch(apiUrl);
