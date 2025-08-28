@@ -83,16 +83,8 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         
-    <!-- Set current year in footer -->
+    <!-- Debug Alpine.js loading -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const yearElement = document.getElementById('currentYear');
-            if (yearElement) {
-                yearElement.textContent = new Date().getFullYear();
-            }
-        });
-        
-        // Debug Alpine.js loading
         document.addEventListener('alpine:init', () => {
             console.log('Alpine.js initialized successfully');
         });
