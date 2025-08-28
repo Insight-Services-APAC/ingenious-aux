@@ -20,6 +20,10 @@ def create_app():
     @app.route('/workflow-process')
     def workflow_process():
         return render_template('workflow-process.html')
+    
+    @app.route('/manage-prompt')
+    def manage_prompt():
+        return render_template('manage-prompt.html')
 
     return app
 
