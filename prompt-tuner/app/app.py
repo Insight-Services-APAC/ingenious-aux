@@ -16,7 +16,11 @@ def create_app():
     @app.route('/')
     def index():
         return render_template('index.html')
-    
+
+    @app.route('/workflow-process')
+    def workflow_process():
+        return render_template('workflow-process.html')
+
     return app
 
 
