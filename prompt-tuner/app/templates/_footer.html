@@ -1,0 +1,27 @@
+<!-- Shared Footer Partial -->
+<footer class="footer mt-auto">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <div class="text-muted small">
+                    <div class="mb-1">
+                        <strong><span id="currentYear"></span> Insight Services APAC®</strong>
+                    </div>
+                    <div>
+                        Powered by AI workflows and intelligent automation.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Set current year in footer -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const yearElement = document.getElementById('currentYear');
+        if (yearElement) {
+            yearElement.textContent = new Date().getFullYear();
+        }
+    });
+</script>
