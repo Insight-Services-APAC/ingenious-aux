@@ -1,9 +1,7 @@
-// Workflow Process JavaScript with Alpine.js
 
 // Access API configuration
 const { baseUrl, endpoints } = window.API_CONFIG;
 
-// Alpine.js data for workflow process page
 function workflowProcessApp() {
     return {
         workflow: {
@@ -166,14 +164,10 @@ function workflowProcessApp() {
             if (!this.workflow.id || this.workflow.agents.length === 0) return;
             
             console.log('Manage prompts for workflow:', this.workflow.id);
-            
-            // Redirect to manage prompts page with workflow information
-            const params = new URLSearchParams({
-                workflowId: this.workflow.id,
-                workflowName: this.workflow.name
-            });
-            
-            window.location.href = `manage-prompts.html?${params.toString()}`;
+
+            const targetUrl = `/manage-prompt?id=${this.workflow.id}`;
+            console.log('Navigating to:', targetUrl);
+            window.location.href = targetUrl;
         }
     };
 }
