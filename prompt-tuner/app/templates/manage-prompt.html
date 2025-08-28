@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Tuner</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="../assets/css/manage-prompts.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <div class="w-100 d-flex justify-content-between align-items-center">
+                <a class="navbar-brand" href="../index.html" style="text-decoration: none;">
+                    Prompt Tuner
+                </a>
+                <a href="../index.html" class="btn btn-outline-primary btn-sm">
+                    ← Back to Workflows
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" x-data="managePromptsApp()">
+        <div class="container">
+            <!-- Header Section -->
+            <div class="header-section text-center mb-5">
+                <h1 class="workflow-title" x-text="workflowName"></h1>
+                <p class="workflow-subtitle">Manage and organize your prompt revisions</p>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="revision-filter">
+                            <label for="revisionSelect" class="form-label"><strong>Select Revision:</strong></label>
+                            <select id="revisionSelect" class="form-select" x-model="selectedRevision" @change="filterPrompts()">
+                                <option value="all">All Revisions</option>
+                                <template x-for="revision in revisions" :key="revision.id">
+                                    <option :value="revision.id" x-text="`${revision.name} (${revision.date})`"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-lg" @click="createNewPrompt()" title="Create a new prompt from scratch">
+                                <i class="bi bi-file-plus"></i>
+                                <span>Create Prompt</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div x-show="loading" class="loading-state text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading prompts...</p>
+            </div>
+
+            <!-- Prompts Grid -->
+            <div class="prompts-grid">
+                <div class="row g-4">
+                    <template x-for="prompt in filteredPrompts" :key="prompt.id">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="prompt-card">
+                                <div class="prompt-card-header d-flex justify-content-between align-items-start">
+                                    <div class="prompt-info flex-grow-1">
+                                        <h5 class="prompt-name" x-text="prompt.name"></h5>
+                                    </div>
+                                    <div class="prompt-version ms-2">
+                                        <span class="revision-badge-stacked" x-text="formatVersionText(prompt.revision_id)"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="prompt-card-body">
+                                    <div class="prompt-details">
+                                        <div class="detail-item">
+                                            <i class="bi bi-calendar3"></i>
+                                            <span x-text="prompt.last_modified"></span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="bi bi-file-earmark"></i>
+                                            <span x-text="prompt.file_path.split('/').pop().replace(/\.[^.]+$/, '.jinja')"></span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="bi bi-file-text"></i>
+                                            <span x-text="`${prompt.size} characters`"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="prompt-preview">
+                                        <p x-text="cleanPreviewText(prompt.preview)"></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="prompt-card-actions">
+                                    <button class="btn btn-outline-primary btn-sm" @click="viewPrompt(prompt)">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" @click="editPrompt(prompt)">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-info btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" @click="duplicatePrompt(prompt)">
+                                                <i class="bi bi-files"></i> Duplicate
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" @click="downloadPrompt(prompt)">
+                                                <i class="bi bi-download"></i> Download
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" @click="deletePrompt(prompt)">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- No Prompts Message -->
+                <div x-show="!loading && filteredPrompts.length === 0" class="no-prompts text-center py-5">
+                    <i class="bi bi-file-text display-1 text-muted"></i>
+                    <h3 class="mt-3">No prompts found</h3>
+                    <p class="text-muted">No prompts match the selected revision filter.</p>
+                </div>
+            </div>
+
+            <!-- View Prompt Modal -->
+            <div class="modal fade" id="viewPromptModal" tabindex="-1" aria-labelledby="viewPromptModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="viewPromptModalLabel" x-text="selectedPrompt?.name || 'View Prompt'"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <template x-if="selectedPrompt">
+                                <div>
+                                    <!-- Prompt Info Section -->
+                                    <div class="prompt-info-section mb-4">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <label class="info-label">Display Name:</label>
+                                                    <span class="info-value" x-text="selectedPrompt.name"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <label class="info-label">Agent Name:</label>
+                                                    <span class="info-value" x-text="getAgentNameFromPrompt(selectedPrompt)"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <label class="info-label">File Name:</label>
+                                                    <span class="info-value" x-text="selectedPrompt.file_path.split('/').pop().replace(/\.[^.]+$/, '.jinja')"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <label class="info-label">Version:</label>
+                                                    <span class="info-value" x-text="getRevisionName(selectedPrompt.revision_id)"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <label class="info-label">Last Modified:</label>
+                                                    <span class="info-value" x-text="selectedPrompt.last_modified"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-item">
+                                                    <label class="info-label">Size:</label>
+                                                    <span class="info-value" x-text="`${selectedPrompt.size} characters`"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prompt Content Section -->
+                                    <div class="prompt-content-section">
+                                        <label class="info-label">Prompt Content:</label>
+                                        <div class="prompt-content-display">
+                                            <pre x-text="getPromptContent(selectedPrompt)"></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" @click="editPrompt(selectedPrompt)">
+                                <i class="bi bi-pencil"></i> Edit Prompt
+                            </button>
+                            <button type="button" class="btn btn-success" @click="downloadPrompt(selectedPrompt)">
+                                <i class="bi bi-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Prompt Modal -->
+            <div class="modal fade" id="editPromptModal" tabindex="-1" aria-labelledby="editPromptModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editPromptModalLabel">
+                                <template x-if="isCreatingNewPrompt">
+                                    <span><i class="bi bi-plus-circle"></i> Create New Prompt</span>
+                                </template>
+                                <template x-if="!isCreatingNewPrompt">
+                                    <span><i class="bi bi-pencil-square"></i> Edit Prompt: <span x-text="selectedPrompt?.name || 'Prompt'"></span></span>
+                                </template>
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <template x-if="selectedPrompt">
+                                <div>
+                                    <!-- Prompt Metadata Section -->
+                                    <div class="edit-metadata-section mb-4">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Display Name</label>
+                                                    <input type="text" class="form-control" x-model="editPromptData.name" placeholder="Enter prompt display name">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">File Name</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" x-model="editPromptData.fileName" placeholder="prompt_name">
+                                                        <span class="input-group-text">.jinja</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Revision</label>
+                                                    <!-- Dropdown for creating new prompts -->
+                                                    <template x-if="isCreatingNewPrompt">
+                                                        <select class="form-select" x-model="editPromptData.revision_id">
+                                                            <template x-for="revision in revisions" :key="revision.id">
+                                                                <option :value="revision.id" x-text="`${revision.name} (${revision.id})`"></option>
+                                                            </template>
+                                                        </select>
+                                                    </template>
+                                                    <!-- Read-only input for editing existing prompts -->
+                                                    <template x-if="!isCreatingNewPrompt">
+                                                        <input type="text" class="form-control" x-model="editPromptData.revision_id" readonly>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prompt Content Editor -->
+                                    <div class="edit-content-section">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <label class="form-label fw-bold mb-0">Prompt Content</label>
+                                            <div class="editor-tools">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary me-2" @click="formatPromptContent()">
+                                                    <i class="bi bi-code-slash"></i> Format
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-info" @click="insertTemplate()">
+                                                    <i class="bi bi-file-plus"></i> Insert Template
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="prompt-editor-container">
+                                            <textarea 
+                                                class="form-control prompt-editor" 
+                                                x-model="editPromptData.content" 
+                                                rows="20" 
+                                                placeholder="Enter your prompt content here...
+# Prompt Title
+
+## Description
+Describe what this prompt does...
+
+## Instructions
+1. Step one
+2. Step two
+3. Step three
+
+## Example
+User: [example input]
+Assistant: [example output]"
+                                            ></textarea>
+                                            <div class="editor-status">
+                                                <small class="text-muted">
+                                                    Characters: <span x-text="editPromptData.content?.length || 0"></span>
+                                                    | Lines: <span x-text="(editPromptData.content?.split('\n') || []).length"></span>
+                                                    | Last saved: <span x-text="lastSavedTime || 'Never'"></span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-outline-info" @click="previewPrompt()">
+                                <i class="bi bi-eye"></i> Preview
+                            </button>
+                            <button type="button" class="btn btn-success" @click="savePromptChanges()" :disabled="!isContentValid">
+                                <i class="bi bi-floppy"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    {% include '_footer.html' %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/manage-prompt.js') }}"></script>
+    
+</body>
+</html>
