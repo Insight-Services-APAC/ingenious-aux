@@ -2,7 +2,10 @@ const API_CONFIG = {
     baseUrl: 'http://localhost:8000',
     endpoints: {
         workflows: '/api/v1/workflows',
-        workflowAgents: '/api/v1/custom-workflows/agents/{workflow-name}'
+        workflowAgents: '/api/v1/custom-workflows/agents/{workflow-name}',
+        workflowsList: '/api/v1/workflows/list',
+        promptView: '/api/v1/prompts/view', 
+        promptUpdate: '/api/v1/prompts/update'
         // Add more endpoints as needed
     }
 };
