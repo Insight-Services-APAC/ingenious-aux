@@ -87,25 +87,6 @@ function workflowApp() {
             return 'ready';
         },
         
-        // Get a single placeholder workflow when API fails or returns no data
-        getPlaceholderWorkflow() {
-            return [
-                {
-                    id: 'bike_insights',
-                    name: 'Bike Insights',
-                    description: 'Comprehensive analysis workflow for bicycle sharing data with predictive analytics and user behavior insights.',
-                    status: 'ready',
-                    agents: ['Azure OpenAI']
-                },
-                {
-                    id: 'restaurant_recommender',
-                    name: 'Restaurant Recommender',
-                    description: 'Intelligent restaurant recommendation system using location, preferences, and real-time data for personalized suggestions.',
-                    status: 'ready',
-                    agents: ['Azure OpenAI']
-                }
-            ];
-        },
         
         // Navigate to workflow process page
         openWorkflow(workflowId) {
