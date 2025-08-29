@@ -5,8 +5,9 @@ const API_CONFIG = {
         workflowAgents: '/api/v1/custom-workflows/agents/{workflow-name}',
         workflowsList: '/api/v1/workflows/list',
         promptView: '/api/v1/prompts/view', 
-        promptUpdate: '/api/v1/prompts/update'
+        promptUpdate: '/api/v1/prompts/update',
+        workflowSchemaRetriever: '/api/v1/custom-workflows/schema/{custom-workflow-name}'
         // Add more endpoints as needed
     }
 };
-window.API_CONFIG = API_CONFIG; // Make it globally available
+window.API_CONFIG = API_CONFIG; // Make it globally availables
