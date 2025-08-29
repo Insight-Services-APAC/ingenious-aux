@@ -143,7 +143,7 @@ function workflowProcessApp() {
             if (!this.workflow.id || this.workflow.agents.length === 0) return;
             
             // Redirect to prompt evaluation page with workflow parameter
-            window.location.href = `prompt-evaluation.html?workflow=${this.workflow.id}`;
+            window.location.href = `/evaluate?id=${this.workflow.id}`;
         },
         
         // Simulate workflow execution with progress
