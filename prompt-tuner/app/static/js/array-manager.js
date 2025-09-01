@@ -83,9 +83,9 @@ class ArrayManager {
         console.log(`🔧 ArrayManager: Generating array item ${itemIndex} for field: ${fieldName} (${displayName})`);
         
         return `
-            <div class="enhanced-card" id="${itemId}" style="margin-left: 1rem; border-left: 3px solid var(--primary-blue);">
+            <div class="enhanced-card" id="${itemId}" style="margin-left: 1rem; border-left: 3px solid var(--primary-blue); padding: 16px;">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="mb-0 text-muted">${displayName} #${itemIndex + 1}</h6>
+                    <h6 class="mb-0 text-muted" style="margin-left: 8px;">${displayName} #${itemIndex + 1}</h6>
                     <div class="d-flex align-items-center gap-2">
                         <button class="btn btn-link text-secondary p-2 d-flex align-items-center justify-content-center" onclick="window.arrayManager.toggleArrayItem('${itemId}')" title="Toggle visibility" style="border: none; width: 32px; height: 32px; border-radius: 50%; background-color: rgba(108, 117, 125, 0.1);">
                             <i class="bi bi-eye" id="${itemId}-toggle-icon" style="font-size: 14px;"></i>
