@@ -1,11 +1,12 @@
 [project]
 name = "prompt-tuner"
 version = "0.1.0"
-description = "Add your description here"
+description = "A simple web application for managing and evaluating workflow prompt templates."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1.2",
     "flask-cors>=6.0.1",
     "requests>=2.32.5",
+    "python-dotenv>=1.0.0",
 ]
