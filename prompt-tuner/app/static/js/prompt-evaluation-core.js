@@ -583,13 +583,17 @@ class PromptEvaluationCore {
             const dynamicFormData = app.getFormDataForSchema();
             console.log('Running evaluation with modular data:', dynamicFormData);
             
-            // Prepare the API request payload
+            // Transform form data to match the required format
+            const transformedFormData = {
+                revision_id: app.selectedPromptVersion,
+                identifier: app.evaluationId,
+                ...dynamicFormData
+            };
+            
+            // Prepare the API request payload in the required format
             const requestPayload = {
-                evaluationId: app.evaluationId,
-                workflowName: app.currentSchema,
-                promptVersion: app.selectedPromptVersion,
-                inputData: dynamicFormData,
-                timestamp: new Date().toISOString()
+                user_prompt: JSON.stringify(transformedFormData),
+                conversation_flow: app.currentSchema
             };
             
             // Simple request body log for testing
