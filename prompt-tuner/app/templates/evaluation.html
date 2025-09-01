@@ -193,12 +193,16 @@
                                     <!-- Agent Metrics Row -->
                                     <div class="agent-metrics-row d-flex flex-wrap gap-3 mb-3">
                                         <div class="metric-item">
-                                            <span class="metric-label">Tokens:</span>
+                                            <span class="metric-label">Total Tokens:</span>
                                             <span class="metric-value" x-text="agentResult.tokensUsed.toLocaleString()"></span>
                                         </div>
-                                        <div class="metric-item">
-                                            <span class="metric-label">Model:</span>
-                                            <span class="metric-value" x-text="agentResult.model"></span>
+                                        <div class="metric-item" x-show="agentResult.promptTokens">
+                                            <span class="metric-label">Prompt Tokens:</span>
+                                            <span class="metric-value" x-text="agentResult.promptTokens.toLocaleString()"></span>
+                                        </div>
+                                        <div class="metric-item" x-show="agentResult.completionTokens">
+                                            <span class="metric-label">Completion Tokens:</span>
+                                            <span class="metric-value" x-text="agentResult.completionTokens.toLocaleString()"></span>
                                         </div>
                                         <div class="metric-item">
                                             <span class="metric-label">Time:</span>

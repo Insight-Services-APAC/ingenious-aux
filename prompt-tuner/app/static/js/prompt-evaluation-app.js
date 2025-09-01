@@ -173,10 +173,8 @@ function promptEvaluationApp() {
             this.isRunning = false;
             this.hasResults = false;
             this.results = null;
-            if (window.dynamicWorkflow) {
-                window.dynamicWorkflow.resetAll();
-                this.syncState();
-            }
+            // Don't reset form data - keep inputs intact for "Run Again"
+            // Only reset the evaluation results, not the form inputs
         },
         
         formatWorkflowOutput(output) {

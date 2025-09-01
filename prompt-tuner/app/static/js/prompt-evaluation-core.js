@@ -647,42 +647,95 @@ class PromptEvaluationCore {
      */
     static processApiResponse(apiResponse, workflowName, inputData) {
         try {
+            console.log('Processing API response:', apiResponse);
+            
             // Extract the main workflow output
-            const workflowOutput = apiResponse.response || apiResponse.output || apiResponse.result || 'No output received';
+            let workflowOutput = 'No output received';
+            
+            // Check if we have agent_response data
+            if (apiResponse.agent_response) {
+                try {
+                    // Parse the agent_response string to JSON
+                    const agentResponseData = JSON.parse(apiResponse.agent_response);
+                    console.log('Parsed agent response data:', agentResponseData);
+                    
+                    // Find the summary agent response for the main workflow output
+                    const summaryAgent = agentResponseData.find(agent => 
+                        agent.__dict__?.chat_name === 'summary'
+                    );
+                    
+                    if (summaryAgent && summaryAgent.__dict__?.chat_response?.chat_message?.__dict__?.content) {
+                        workflowOutput = summaryAgent.__dict__.chat_response.chat_message.__dict__.content;
+                    } else {
+                        // Fallback to first agent's response
+                        const firstAgent = agentResponseData[0];
+                        if (firstAgent && firstAgent.__dict__?.chat_response?.chat_message?.__dict__?.content) {
+                            workflowOutput = firstAgent.__dict__.chat_response.chat_message.__dict__.content;
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing agent_response:', parseError);
+                    workflowOutput = 'Error parsing agent response data';
+                }
+            }
             
             // Process agent results if available
             const agentResults = [];
             
-            if (apiResponse.agentResults && Array.isArray(apiResponse.agentResults)) {
-                apiResponse.agentResults.forEach(agent => {
-                    agentResults.push({
-                        agentName: agent.name || agent.agentName || 'Unknown Agent',
-                        displayName: agent.displayName || agent.name || 'Unknown Agent',
-                        output: agent.output || agent.response || 'No output',
-                        tokensUsed: agent.tokensUsed || agent.tokens || 0,
-                        model: agent.model || 'Unknown',
-                        executionTime: agent.executionTime || agent.duration || 0,
-                        expanded: false // For UI state
+            if (apiResponse.agent_response) {
+                try {
+                    const agentResponseData = JSON.parse(apiResponse.agent_response);
+                    
+                    agentResponseData.forEach((agent, index) => {
+                        const agentDict = agent.__dict__;
+                        if (!agentDict) return;
+                        
+                        const chatResponse = agentDict.chat_response?.chat_message?.__dict__;
+                        const agentName = agentDict.chat_name || `agent_${index + 1}`;
+                        
+                        // Clean up agent display name
+                        const displayName = BaseManager.cleanDisplayName(agentName);
+                        
+                        agentResults.push({
+                            agentName: agentName,
+                            displayName: displayName,
+                            output: chatResponse?.content || 'No output available',
+                            tokensUsed: (agentDict.prompt_tokens || 0) + (agentDict.completion_tokens || 0),
+                            model: chatResponse?.models_usage?.model || 'Unknown',
+                            executionTime: agentDict.end_time && agentDict.start_time ? 
+                                Math.round((agentDict.end_time - agentDict.start_time) * 1000) : 0,
+                            expanded: false, // For UI state
+                            promptTokens: agentDict.prompt_tokens || 0,
+                            completionTokens: agentDict.completion_tokens || 0
+                        });
                     });
-                });
-            } else {
-                // If no agent results, create a default entry from the main response
+                } catch (parseError) {
+                    console.error('Error processing individual agents:', parseError);
+                }
+            }
+            
+            // If no agent results, create a default entry from the main response
+            if (agentResults.length === 0) {
                 agentResults.push({
                     agentName: 'workflow_agent',
                     displayName: 'Workflow Agent',
                     output: workflowOutput,
-                    tokensUsed: apiResponse.tokensUsed || 0,
-                    model: apiResponse.model || 'Unknown',
-                    executionTime: apiResponse.executionTime || 0,
-                    expanded: false
+                    tokensUsed: apiResponse.token_count || 0,
+                    model: 'Unknown',
+                    executionTime: 0,
+                    expanded: false,
+                    promptTokens: 0,
+                    completionTokens: apiResponse.token_count || 0
                 });
             }
             
             return {
                 workflowOutput,
                 agentResults,
-                evaluationId: apiResponse.evaluationId,
-                timestamp: apiResponse.timestamp || new Date().toISOString()
+                evaluationId: apiResponse.message_id || null,
+                threadId: apiResponse.thread_id || null,
+                totalTokens: apiResponse.token_count || 0,
+                timestamp: new Date().toISOString()
             };
             
         } catch (error) {
@@ -691,6 +744,8 @@ class PromptEvaluationCore {
                 workflowOutput: 'Error processing response: ' + error.message,
                 agentResults: [],
                 evaluationId: null,
+                threadId: null,
+                totalTokens: 0,
                 timestamp: new Date().toISOString()
             };
         }
