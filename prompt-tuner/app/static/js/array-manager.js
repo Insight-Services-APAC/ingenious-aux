@@ -84,6 +84,17 @@ class ArrayManager {
         
         return `
             <div class="enhanced-card" id="${itemId}" style="margin-left: 1rem; border-left: 3px solid var(--primary-blue);">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="mb-0 text-muted">${displayName} #${itemIndex + 1}</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-link text-secondary p-2 d-flex align-items-center justify-content-center" onclick="window.arrayManager.toggleArrayItem('${itemId}')" title="Toggle visibility" style="border: none; width: 32px; height: 32px; border-radius: 50%; background-color: rgba(108, 117, 125, 0.1);">
+                            <i class="bi bi-eye" id="${itemId}-toggle-icon" style="font-size: 14px;"></i>
+                        </button>
+                        <button class="btn btn-link text-danger p-2 d-flex align-items-center justify-content-center" onclick="window.arrayManager.removeArrayItem('${itemId}', '${fieldName}')" title="Remove item" style="border: none; width: 32px; height: 32px; border-radius: 50%; background-color: rgba(220, 53, 69, 0.1);">
+                            <i class="bi bi-trash" style="font-size: 14px;"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="array-item-content" id="${itemId}-content">
                     ${fieldsHtml}
                 </div>
@@ -801,6 +812,60 @@ class ArrayManager {
         });
         
         console.log('ArrayManager: Toggle states restored');
+    }
+
+    /**
+     * Toggle visibility of array item content
+     */
+    toggleArrayItem(itemId) {
+        const content = document.getElementById(`${itemId}-content`);
+        const toggleIcon = document.getElementById(`${itemId}-toggle-icon`);
+        
+        if (!content || !toggleIcon) return;
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggleIcon.className = 'bi bi-eye';
+        } else {
+            content.style.display = 'none';
+            toggleIcon.className = 'bi bi-eye-slash';
+        }
+    }
+
+    /**
+     * Remove array item from DOM and data
+     */
+    removeArrayItem(itemId, fieldName) {
+        // Confirm deletion
+        if (!confirm('Are you sure you want to remove this item?')) {
+            return;
+        }
+        
+        const itemElement = document.getElementById(itemId);
+        if (!itemElement) return;
+        
+        // Extract item index from itemId (format: fieldName-index)
+        const indexMatch = itemId.match(/-(\d+)$/);
+        if (!indexMatch) return;
+        
+        const itemIndex = parseInt(indexMatch[1]);
+        
+        // Get current schema from the global workflow manager
+        const currentSchema = window.dynamicWorkflow?.currentSchema;
+        if (!currentSchema) {
+            console.error('Cannot remove array item: no current schema found');
+            return;
+        }
+        
+        // Remove from DOM
+        itemElement.remove();
+        
+        // Remove from data
+        if (this.dataManager && typeof this.dataManager.removeArrayItem === 'function') {
+            this.dataManager.removeArrayItem(currentSchema, fieldName, itemIndex);
+        }
+        
+        console.log(`ArrayManager: Removed array item ${itemId} from field ${fieldName}`);
     }
 }
 
