@@ -1,0 +1,208 @@
+/**
+ * Prompt Evaluation App - Main Application Logic
+ * Alpine.js application with UI interaction methods and state management
+ */
+
+/**
+ * Enhanced Prompt Evaluation App using Modular Dynamic Workflow Architecture
+ * This is the main Alpine.js app function with complex logic delegated to external modules
+ */
+function promptEvaluationApp() {
+    return {
+        // State from DynamicWorkflowManager
+        currentSchema: null,
+        availableWorkflows: [],
+        schemasLoaded: false,
+        showFormHeader: false,
+        showFormActions: false,
+        showResults: false,
+        formTitle: 'Dynamic Form',
+        dynamicFormHtml: '',
+        resultsHtml: '',
+        
+        // Evaluation-specific state
+        workflow: { name: 'Workflow Evaluation', id: null },
+        isRunning: false,
+        hasResults: false,
+        results: null,
+        selectedPromptVersion: '',
+        revisions: [],
+        workflowQueryParam: null,
+        formDataExists: false,
+        
+        // Initialization
+        async init() {
+            return await PromptEvaluationCore.initialize(this);
+        },
+        
+        // Schema selection (delegate to DynamicWorkflowManager)
+        async selectSchema(schemaName) {
+            if (window.dynamicWorkflow) {
+                await window.dynamicWorkflow.selectSchema(schemaName);
+                this.syncState();
+            }
+        },
+        
+        // Simple utility functions that stay inline
+        generateCompactIdentifier() {
+            return JSONResponseBuilder.generateCompactIdentifier();
+        },
+
+        createFormattedJsonStructure(formData) {
+            // DEBUG: Log schema construction details
+            console.log('=== createFormattedJsonStructure (app.js) DEBUG ===');
+            console.log('currentSchema:', this.currentSchema);
+            console.log('window.dynamicWorkflow exists:', !!window.dynamicWorkflow);
+            console.log('currentSchemaData exists:', !!window.dynamicWorkflow?.currentSchemaData);
+            if (window.dynamicWorkflow?.currentSchemaData) {
+                console.log('currentSchemaData structure:', JSON.stringify(window.dynamicWorkflow.currentSchemaData, null, 2));
+            }
+            
+            // Get the full schema object for dynamic field extraction
+            const schemaInfo = PromptEvaluationCore.getSchemaInfo(this);
+            console.log('schemaInfo from PromptEvaluationCore:', schemaInfo);
+            const schemaObject = schemaInfo ? schemaInfo.schema : null;
+            
+            // Try to get full schema from dynamicWorkflow if available
+            let fullSchemaObject = null;
+            if (window.dynamicWorkflow && window.dynamicWorkflow.currentSchemaData) {
+                fullSchemaObject = {
+                    workflow_name: this.currentSchema,
+                    schemas: {
+                        RootModel: window.dynamicWorkflow.currentSchemaData
+                    }
+                };
+                console.log('Constructed fullSchemaObject:', JSON.stringify(fullSchemaObject, null, 2));
+            } else {
+                console.log('No currentSchemaData available, using schemaObject:', schemaObject);
+            }
+            console.log('=== END app.js DEBUG ===');
+            
+            return JSONResponseBuilder.createFormattedJsonStructure(
+                formData, 
+                this.selectedPromptVersion, 
+                this.currentSchema, 
+                fullSchemaObject || schemaObject
+            );
+        },
+
+        logFormDataToConsole() {
+            return PromptEvaluationCore.logFormDataToConsole(this);
+        },
+        
+        // Complex functions delegated to external modules
+        async waitForDynamicWorkflow() {
+            return await PromptEvaluationCore.waitForDynamicWorkflow();
+        },
+        
+        setupStateSync() {
+            return PromptEvaluationCore.setupStateSync(this);
+        },
+        
+        syncState() {
+            return PromptEvaluationCore.syncState(this);
+        },
+        
+        forceDataSync() {
+            return PromptEvaluationCore.forceDataSync(this);
+        },
+        
+        getFormDataForSchema() {
+            return PromptEvaluationCore.getFormDataForSchema(this);
+        },
+        
+        collectFormDataDirectly() {
+            return PromptEvaluationCore.collectFormDataDirectly(this);
+        },
+        
+        initFormDataTracking() {
+            return PromptEvaluationCore.initFormDataTracking(this);
+        },
+        
+        updateFormDataStatus() {
+            return PromptEvaluationCore.updateFormDataStatus(this);
+        },
+        
+        downloadFormDataJson() {
+            return PromptEvaluationCore.downloadFormDataJson(this);
+        },
+        
+        async runEvaluationWithDynamicData() {
+            return await PromptEvaluationCore.runEvaluationWithDynamicData(this);
+        },
+        
+        generateEnhancedResults(workflowId, inputData) {
+            return PromptEvaluationCore.generateEnhancedResults(workflowId, inputData);
+        },
+        
+        async loadRevisionsFromAPI() {
+            return await PromptEvaluationCore.loadRevisionsFromAPI(this);
+        },
+        
+        downloadResults() {
+            return PromptEvaluationCore.downloadResults(this);
+        },
+        
+        // Simple functions kept inline for Alpine.js
+        initializePromptVersion() {
+            const versions = this.getAvailableVersions();
+            if (versions.length > 0) {
+                this.selectedPromptVersion = versions[0].id;
+            }
+        },
+        
+        getAvailableVersions() {
+            return this.revisions.map(revision => ({
+                id: revision.id,
+                display: `${revision.name} (${revision.date})`,
+                date: revision.date,
+                status: revision.status
+            }));
+        },
+        
+        resetEvaluation() {
+            this.isRunning = false;
+            this.hasResults = false;
+            this.results = null;
+            if (window.dynamicWorkflow) {
+                window.dynamicWorkflow.resetAll();
+                this.syncState();
+            }
+        },
+        
+        formatWorkflowOutput(output) {
+            return output.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        },
+        
+        getAgentDescription(agentName) {
+            const descriptions = {
+                'schema_validator': 'Validates schema structure and data integrity',
+                'data_processor': 'Processes form data using modular architecture',
+                'evaluation_engine': 'Evaluates workflow performance and readiness'
+            };
+            return descriptions[agentName] || 'Specialized evaluation agent';
+        },
+        
+        async copyAgentOutput(output) {
+            try {
+                await navigator.clipboard.writeText(output);
+                console.log('Agent output copied to clipboard');
+            } catch (err) {
+                console.error('Failed to copy to clipboard:', err);
+            }
+        },
+        
+        // Helper methods that can stay inline
+        hasFormData() {
+            const formData = this.getFormDataForSchema();
+            return formData && Object.keys(formData).length > 0;
+        },
+        
+        hasAnyFormData() {
+            return this.formDataExists;
+        }
+    };
+}
+
+// Export for global access
+window.promptEvaluationApp = promptEvaluationApp;
