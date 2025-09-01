@@ -48,15 +48,6 @@ Prompt Tuner provides a centralized platform for managing prompt templates acros
 
 The application will be available at `http://localhost:5000`
 
-## Technologies & Libraries
-
-- **[Flask 3.1.2+](https://flask.palletsprojects.com/)** - Python web framework with modern async support
-- **[Alpine.js 3.13.3](https://alpinejs.dev/)** - Minimal reactive framework (only 15kb gzipped)
-- **[Bootstrap 5.3.2](https://getbootstrap.com/)** - CSS framework for responsive design and components
-- **[Bootstrap Icons 1.11.1](https://icons.getbootstrap.com/)** - SVG icon library with 1,800+ icons
-- **[Flask-CORS 6.0.1](https://flask-cors.readthedocs.io/)** - Cross-Origin Resource Sharing support for API access
-- **[uv](https://github.com/astral-sh/uv)** - Ultra-fast Python package installer and resolver
-
 ## Project Structure
 
 ```
