@@ -24,7 +24,7 @@ Prompt Tuner provides a centralized platform for managing prompt templates acros
    pip install uv
    
    # Install project dependencies
-   uv pip install .
+   uv sync
    ```
 
 3. **Run the application**
