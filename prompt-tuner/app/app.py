@@ -25,6 +25,10 @@ def create_app():
     def manage_prompt():
         return render_template('manage-prompt.html')
 
+    @app.route('/evaluate')
+    def prompt_evaluation():
+        return render_template('evaluation.html')
+
     return app
 
 
