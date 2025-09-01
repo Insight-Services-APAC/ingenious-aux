@@ -114,7 +114,7 @@
                     <!-- Run Evaluation Button -->
                     <div class="text-center mt-4" x-show="currentSchema">
                         <button 
-                            class="btn btn-primary btn-lg px-5 me-3" 
+                            class="btn btn-primary px-4 me-3" 
                             @click="runEvaluationWithDynamicData()"
                             :disabled="!currentSchema || !formDataExists"
                         >
@@ -122,7 +122,7 @@
                             Run Evaluation
                         </button>
                         <button 
-                            class="btn btn-outline-success btn-lg px-4" 
+                            class="btn btn-outline-success px-3" 
                             @click="downloadFormDataJson()"
                             :disabled="!currentSchema || !formDataExists"
                             title="Download form data as JSON file"
@@ -151,7 +151,7 @@
             <div class="results-section" x-show="hasResults && !isRunning" x-transition>
                 <div class="section-header mb-4 text-start">
                     <h3>Evaluation Results</h3>
-                    <p class="text-muted">Complete workflow execution results and agent performance metrics</p>
+                    <p class="text-muted">Complete workflow execution result</p>
                 </div>
 
                 <!-- Workflow Results -->
@@ -166,7 +166,7 @@
                 <!-- Agent Evaluations -->
                 <div class="agent-evaluations mb-5">
                     <div class="section-header mb-4 text-start">
-                        <h3>Agent Results & Performance</h3>
+                        <h4 class="text-start">Agent Results & Performance</h4>
                         <p class="text-muted">Individual agent outputs and performance metrics for transparency and debugging</p>
                     </div>
                     
@@ -174,14 +174,13 @@
                         <template x-for="agentResult in results.agentResults" :key="agentResult.agentName">
                             <div class="col-12">
                                 <div class="agent-card">
-                                    <div class="agent-header d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h5 x-text="agentResult.displayName"></h5>
-                                            <p class="text-muted small mb-0" x-text="getAgentDescription(agentResult.agentName)"></p>
+                                    <div class="agent-header d-flex justify-content-between align-items-center py-2">
+                                        <div class="pe-3">
+                                            <h5 class="mb-0" x-text="agentResult.displayName"></h5>
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <button 
-                                                class="btn btn-sm btn-outline-secondary"
+                                                class="btn btn-sm btn-outline-secondary px-2 py-1"
                                                 @click="agentResult.expanded = !agentResult.expanded"
                                                 :class="{ 'active': agentResult.expanded }"
                                             >
@@ -191,7 +190,7 @@
                                     </div>
                                     
                                     <!-- Agent Metrics Row -->
-                                    <div class="agent-metrics-row d-flex flex-wrap gap-3 mb-3">
+                                    <div class="agent-metrics-row d-flex flex-wrap gap-3 py-2 mb-2">
                                         <div class="metric-item">
                                             <span class="metric-label">Total Tokens:</span>
                                             <span class="metric-value" x-text="agentResult.tokensUsed.toLocaleString()"></span>
