@@ -29,9 +29,11 @@ function promptEvaluationApp() {
         revisions: [],
         workflowQueryParam: null,
         formDataExists: false,
+        evaluationId: '',
         
         // Initialization
         async init() {
+            this.generateNewEvaluationId(); // Initialize with a new evaluation ID
             return await PromptEvaluationCore.initialize(this);
         },
         
@@ -46,6 +48,13 @@ function promptEvaluationApp() {
         // Simple utility functions that stay inline
         generateCompactIdentifier() {
             return JSONResponseBuilder.generateCompactIdentifier();
+        },
+
+        generateNewEvaluationId() {
+            // Generate 6 digit random number
+            const randomNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+            this.evaluationId = randomNumber;
+            return this.evaluationId;
         },
 
         createFormattedJsonStructure(formData) {
