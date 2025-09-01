@@ -13,7 +13,7 @@
     
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/prompt-evaluation.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/evaluation.css') }}" rel="stylesheet">
     
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
@@ -119,15 +119,6 @@
                         >
                             <i class="bi bi-download me-2"></i>
                             Download JSON
-                        </button>
-                        <button 
-                            class="btn btn-outline-info btn-lg px-4" 
-                            @click="logFormDataToConsole()"
-                            :disabled="!currentSchema || !formDataExists"
-                            title="Log form data to browser console"
-                        >
-                            <i class="bi bi-terminal me-2"></i>
-                            Log JSON to Console
                         </button>
                     </div>
                 </div>
