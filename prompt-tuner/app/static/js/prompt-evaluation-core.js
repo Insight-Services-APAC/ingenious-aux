@@ -583,11 +583,38 @@ class PromptEvaluationCore {
             const dynamicFormData = app.getFormDataForSchema();
             console.log('Running evaluation with modular data:', dynamicFormData);
             
-            app.logFormDataToConsole();
+            // Prepare the API request payload
+            const requestPayload = {
+                evaluationId: app.evaluationId,
+                workflowName: app.currentSchema,
+                promptVersion: app.selectedPromptVersion,
+                inputData: dynamicFormData,
+                timestamp: new Date().toISOString()
+            };
             
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            // Simple request body log for testing
+            console.log('REQUEST BODY:', JSON.stringify(requestPayload, null, 2));
             
-            app.results = app.generateEnhancedResults(app.currentSchema, dynamicFormData);
+            // Make API call to the chat endpoint
+            const response = await fetch(`${window.API_CONFIG.baseUrl}${window.API_CONFIG.endpoints.chat}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestPayload)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error Response Body:', errorText);
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            }
+            
+            const apiResponse = await response.json();
+            console.log('API response received:', apiResponse);
+            
+            // Process the API response and format for display
+            app.results = PromptEvaluationCore.processApiResponse(apiResponse, app.currentSchema, dynamicFormData);
             
             app.isRunning = false;
             app.hasResults = true;
@@ -609,6 +636,60 @@ class PromptEvaluationCore {
         ];
         
         return { workflowOutput, agentResults };
+    }
+
+    /**
+     * Process API response and format for display
+     */
+    static processApiResponse(apiResponse, workflowName, inputData) {
+        try {
+            // Extract the main workflow output
+            const workflowOutput = apiResponse.response || apiResponse.output || apiResponse.result || 'No output received';
+            
+            // Process agent results if available
+            const agentResults = [];
+            
+            if (apiResponse.agentResults && Array.isArray(apiResponse.agentResults)) {
+                apiResponse.agentResults.forEach(agent => {
+                    agentResults.push({
+                        agentName: agent.name || agent.agentName || 'Unknown Agent',
+                        displayName: agent.displayName || agent.name || 'Unknown Agent',
+                        output: agent.output || agent.response || 'No output',
+                        tokensUsed: agent.tokensUsed || agent.tokens || 0,
+                        model: agent.model || 'Unknown',
+                        executionTime: agent.executionTime || agent.duration || 0,
+                        expanded: false // For UI state
+                    });
+                });
+            } else {
+                // If no agent results, create a default entry from the main response
+                agentResults.push({
+                    agentName: 'workflow_agent',
+                    displayName: 'Workflow Agent',
+                    output: workflowOutput,
+                    tokensUsed: apiResponse.tokensUsed || 0,
+                    model: apiResponse.model || 'Unknown',
+                    executionTime: apiResponse.executionTime || 0,
+                    expanded: false
+                });
+            }
+            
+            return {
+                workflowOutput,
+                agentResults,
+                evaluationId: apiResponse.evaluationId,
+                timestamp: apiResponse.timestamp || new Date().toISOString()
+            };
+            
+        } catch (error) {
+            console.error('Error processing API response:', error);
+            return {
+                workflowOutput: 'Error processing response: ' + error.message,
+                agentResults: [],
+                evaluationId: null,
+                timestamp: new Date().toISOString()
+            };
+        }
     }
 
     /**
