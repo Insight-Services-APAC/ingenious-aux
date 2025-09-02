@@ -320,14 +320,15 @@ class PromptEvaluationCore {
             app.currentSchema, 
             fullSchemaObject || schemaInfo.schema
         );
-        
-        console.log('=== FORM DATA JSON ===');
-        console.log('Raw form data:', formData);
-        console.log('Transformed data:', transformedData);
-        console.log('Formatted JSON structure:', formattedData);
-        console.log('JSON formatted:', JSON.stringify(formattedData, null, 2));
-        console.log('=== END FORM DATA ===');
-        return formattedData;
+
+    // Return the full structure with user_prompt and conversation_flow
+    console.log('=== FORM DATA JSON (full) ===');
+    console.log('Raw form data:', formData);
+    console.log('Transformed data:', transformedData);
+    console.log('Formatted JSON structure:', formattedData);
+    console.log('JSON formatted:', JSON.stringify(formattedData, null, 2));
+    console.log('=== END FORM DATA ===');
+    return formattedData;
     }
 
     /**
@@ -519,46 +520,9 @@ class PromptEvaluationCore {
             alert('No form data available to download. Please fill out the form fields first.');
             return;
         }
-        
-        const schemaInfo = this.getSchemaInfo(app);
-        const transformedData = JSONResponseBuilder.transformFormDataForStores(formData, schemaInfo);
-        
-        // Get full schema object for dynamic field extraction
-        let fullSchemaObject = null;
-        if (window.dynamicWorkflow && window.dynamicWorkflow.currentSchemaData) {
-            fullSchemaObject = {
-                workflow_name: app.currentSchema,
-                schemas: {
-                    RootModel: window.dynamicWorkflow.currentSchemaData
-                }
-            };
-        }
-        
-        // If we don't have a full schema object, but we have schemaInfo with containerName,
-        // create a minimal schema object that our extraction function can understand
-        if (!fullSchemaObject && schemaInfo && schemaInfo.containerName) {
-            fullSchemaObject = {
-                workflow_name: app.currentSchema,
-                schemas: {
-                    RootModel: {
-                        properties: {
-                            [schemaInfo.containerName]: {
-                                type: 'array',
-                                items: {}
-                            }
-                        }
-                    }
-                }
-            };
-        }
-        
-        const downloadData = JSONResponseBuilder.createFormattedJsonStructure(
-            transformedData, 
-            app.selectedPromptVersion, 
-            app.currentSchema, 
-            fullSchemaObject || schemaInfo.schema
-        );
-        const jsonString = JSON.stringify(downloadData, null, 2);
+    // Reuse constructRawJson and extract the inner user_prompt payload
+    const downloadData = this.constructRawJson(app);
+    const jsonString = JSON.stringify(downloadData, null, 2);
         
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -571,7 +535,7 @@ class PromptEvaluationCore {
         link.click();
         URL.revokeObjectURL(url);
         
-        console.log('📥 Form data JSON downloaded (new format):', downloadData);
+    console.log('📥 Form data JSON downloaded (new format):', downloadData);
     }
 
     /**
@@ -837,43 +801,8 @@ class PromptEvaluationCore {
             }
 
             if (app.jsonViewType === 'raw') {
-                // Generate Raw JSON (same as constructRawJson)
-                const schemaInfo = this.getSchemaInfo(app);
-                const transformedData = JSONResponseBuilder.transformFormDataForStores(formData, schemaInfo);
-                
-                // Get full schema object for dynamic field extraction
-                let fullSchemaObject = null;
-                if (window.dynamicWorkflow && window.dynamicWorkflow.currentSchemaData) {
-                    fullSchemaObject = {
-                        workflow_name: app.currentSchema,
-                        schemas: {
-                            RootModel: window.dynamicWorkflow.currentSchemaData
-                        }
-                    };
-                }
-                
-                if (!fullSchemaObject && schemaInfo && schemaInfo.containerName) {
-                    fullSchemaObject = {
-                        workflow_name: app.currentSchema,
-                        schemas: {
-                            RootModel: {
-                                properties: {
-                                    [schemaInfo.containerName]: {
-                                        type: 'array',
-                                        items: {}
-                                    }
-                                }
-                            }
-                        }
-                    };
-                }
-                
-                app.currentJsonData = JSONResponseBuilder.createFormattedJsonStructure(
-                    transformedData, 
-                    app.selectedPromptVersion, 
-                    app.currentSchema, 
-                    fullSchemaObject || schemaInfo.schema
-                );
+                // Generate Raw JSON (full formatted structure)
+                app.currentJsonData = this.constructRawJson(app);
             } else if (app.jsonViewType === 'final') {
                 // Generate Final JSON (same as constructFinalJson)
                 const formattedData = this.constructRawJson(app);

@@ -98,14 +98,13 @@ function promptEvaluationApp() {
             return PromptEvaluationCore.constructRawJson(this);
         },
 
-        // Build and log the final JSON payload in the required format
+    // Build and log the final JSON payload in the required format
         constructFinalJson() {
             try {
                 // Use the core function to get formatted data and log it
                 const formattedData = PromptEvaluationCore.constructRawJson(this);
 
-
-                // Use the inner payload for user_prompt, and conversation_flow from formattedData
+        // conversation_flow comes from currentSchema
                 const finalJson = {
                     user_prompt: JSON.stringify(formattedData.user_prompt),
                     conversation_flow: formattedData.conversation_flow

@@ -912,18 +912,22 @@ class JSONResponseBuilder {
                         console.log(`    Match groups:`, match);
                         
                         if (pattern.type === 'flattened_union') {
-                            // Handle flattened union fields: bike_stock_0_bike_brand -> brand (flatten directly)
+                            // Updated behavior: nest union properties under the union field name
+                            // Example: bike_stock_0_bike_brand -> { bike: { brand: value } }
                             const unionProp = pattern.unionProperty;
-                            cleanKey = unionProp;
-                            cleanItem[cleanKey] = value;
-                            console.log(`→ Flattened union field: ${key} -> ${cleanKey} = ${value}`);
-                            
-                            // Detect union type from form data if available
-                            if (!unionTypeSelected && item.bike) {
-                                unionTypeSelected = item.bike;
+                            const unionField = pattern.unionField;
+                            if (!nestedObjects[unionField]) {
+                                nestedObjects[unionField] = {};
+                            }
+                            nestedObjects[unionField][unionProp] = value;
+                            console.log(`→ Nested union field: ${unionField}.${unionProp} = ${value}`);
+
+                            // Detect union type from form data if available (do not overwrite object later)
+                            if (!unionTypeSelected && item[unionField]) {
+                                unionTypeSelected = item[unionField];
                                 console.log(`🎯 Detected union type selection: ${unionTypeSelected}`);
                             }
-                            
+
                             processed = true;
                             break;
                         } else if (pattern.type === 'flattened_direct') {
@@ -1034,9 +1038,11 @@ class JSONResponseBuilder {
         });
         
         // Add union type discriminator if union fields were detected
-        if (unionTypeSelected || (item.bike && typeof item.bike === 'string')) {
+        // Add union type discriminator only if there is not already an object for the union field
+        if ((unionTypeSelected || (item.bike && typeof item.bike === 'string')) &&
+            !(cleanItem['bike'] && typeof cleanItem['bike'] === 'object') &&
+            !(nestedObjects['bike'] && typeof nestedObjects['bike'] === 'object')) {
             const bikeType = unionTypeSelected || item.bike;
-            // Convert discriminator values to readable form
             const bikeTypeMap = {
                 'rootmodel_mountainbike': 'MountainBike',
                 'rootmodel_roadbike': 'RoadBike', 
