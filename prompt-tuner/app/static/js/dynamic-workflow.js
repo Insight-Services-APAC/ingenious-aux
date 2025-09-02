@@ -266,11 +266,8 @@ class DynamicWorkflowManager {
      * Generate HTML for individual field
      */
     generateFieldHtml(fieldName, field, allSchemas) {
-        const rawDisplayName = field.display_name || field.title || fieldName;
-        const displayName = BaseManager.cleanDisplayName(rawDisplayName);
+        const displayName = field.display_name || field.title || fieldName;
         const fieldId = `field-${fieldName}`;
-        
-        console.log(`🔧 DynamicWorkflow: Generating field: ${fieldName} (${displayName}), type: ${field.type}, ui_component: ${field.ui_component}`);
         
         // Always prioritize $ref object references over ui_component
         if (field.$ref) {
@@ -331,8 +328,7 @@ class DynamicWorkflowManager {
      * Generate nested object field
      */
     generateNestedObjectField(fieldName, field, allSchemas) {
-        const rawDisplayName = field.display_name || field.title || fieldName;
-        const displayName = BaseManager.cleanDisplayName(rawDisplayName);
+        const displayName = field.display_name || field.title || fieldName;
         const fieldId = `nested-${fieldName}`;
         
         // Resolve the $ref to get the referenced schema
@@ -385,8 +381,7 @@ class DynamicWorkflowManager {
      * Generate HTML for nested object field
      */
     generateNestedObjectFieldHtml(parentFieldName, propName, prop) {
-        const rawDisplayName = prop.display_name || prop.title || propName;
-        const displayName = BaseManager.cleanDisplayName(rawDisplayName);
+        const displayName = prop.display_name || prop.title || propName;
         const fieldId = `${parentFieldName}-${propName}`;
         const onChange = `onchange="window.dynamicWorkflow.updateNestedObjectFieldData('${parentFieldName}', '${propName}', this.value)"`;
         const onChangeFloat = `onchange="window.dynamicWorkflow.updateNestedObjectFieldData('${parentFieldName}', '${propName}', parseFloat(this.value))"`;
@@ -428,8 +423,7 @@ class DynamicWorkflowManager {
      * Generate fallback field
      */
     generateFallbackField(fieldName, field) {
-        const rawDisplayName = field.display_name || field.title || fieldName;
-        const displayName = BaseManager.cleanDisplayName(rawDisplayName);
+        const displayName = field.display_name || field.title || fieldName;
         const fieldId = `field-${fieldName}`;
         return `
             <div class="mb-3">
@@ -446,8 +440,7 @@ class DynamicWorkflowManager {
      * Generate union select field
      */
     generateUnionSelectField(fieldName, field, allSchemas) {
-        const rawDisplayName = field.display_name || field.title || fieldName;
-        const displayName = BaseManager.cleanDisplayName(rawDisplayName);
+        const displayName = field.display_name || field.title || fieldName;
         const unionOptions = field.union_options || [];
         
         // Cache the field and union options for dynamic rendering
@@ -459,7 +452,8 @@ class DynamicWorkflowManager {
         
         let optionsHtml = unionOptions.map(option => `
             <div class="option-card" onclick="window.dynamicWorkflow.selectUnionOption('${fieldName}', '${option.value}', this)">
-                <span class="option-name">${BaseManager.cleanDisplayName(option.label)}</span>
+                <span class="option-icon">${this.getUnionIcon(option.label)}</span>
+                <span class="option-name">${option.label}</span>
             </div>
         `).join('');
 
