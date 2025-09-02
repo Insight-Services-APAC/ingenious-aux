@@ -454,7 +454,7 @@ class JSONResponseBuilder {
                                 // For union array structures, create flattened patterns (bike_stock_0_quantity -> quantity)
                                 if (objStructure.unionFields && Object.keys(objStructure.unionFields).length > 0) {
                                     const flattenedDirectPattern = new RegExp(
-                                        `^${objName.replace(/[.*+?^${}()|[\\\\]\\\\]/g, '\\\\$&')}_\\\\d+_${directField.replace(/[.*+?^${}()|[\\\\]\\\\]/g, '\\\\$&')}$`
+                                        `^${objName.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}_\\d+_${directField.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`
                                     );
                                     patterns.push({
                                         regex: flattenedDirectPattern,
@@ -466,7 +466,7 @@ class JSONResponseBuilder {
                                 } else {
                                     // Regular nested array direct pattern for non-union structures
                                     const nestedDirectPattern = new RegExp(
-                                        `^${actualArrayField.replace(/[.*+?^${}()|[\\\\]\\\\]/g, '\\\\$&')}_\\\\d+_${objName}_\\\\d+_${directField.replace(/[.*+?^${}()|[\\\\]\\\\]/g, '\\\\$&')}$`
+                                        `^${actualArrayField.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}_\\d+_${objName}_\\d+_${directField.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`
                                     );
                                     patterns.push({
                                         regex: nestedDirectPattern,
