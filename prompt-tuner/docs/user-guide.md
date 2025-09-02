@@ -44,7 +44,6 @@ Prompt Tuner follows a structured workflow to help users manage and optimize the
 
 **Transparency Features:**
 - Per-agent result breakdown
-- Complete workflow execution logs
 - Performance metrics and insights
 
 

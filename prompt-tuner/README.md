@@ -1,12 +1,10 @@
 # Prompt Tuner
 
-A web application for managing and evaluating AI workflow prompts with an intuitive interface for version control, testing, and optimization.
+A simple web application for managing and evaluating AI workflow prompts with an intuitive interface for version control, testing, and optimization.
 
 ## Description
 
-Prompt Tuner provides a centralized platform for managing prompt templates across your different AI workflows. Built with Flask and Alpine.js, it offers dynamic form generation, version management, and evaluation capabilities. The application connects to backend APIs to fetch workflows, schemas and generates forms dynamically based on the workflow requirements.
-
-> **Learn how to use the application** - Check out the [User Guide](docs/user-guide.md)
+The Prompt Tuner provides a centralized platform for managing prompt templates across your different AI workflows. It offers version management and evaluation capabilities. This application connects to backend APIs to fetch workflows, prompts, schemas and generates forms dynamically based on the workflow requirements.
 
 ## Installation & Setup
 
@@ -15,6 +13,8 @@ Prompt Tuner provides a centralized platform for managing prompt templates acros
 1. **Clone the repository**
    ```bash
    git clone https://github.com/Insight-Services-APAC/ingenious-aux.git
+
+   # Go to prompt-tuner folder
    cd ingenious-aux/prompt-tuner
    ```
 
@@ -33,7 +33,7 @@ Prompt Tuner provides a centralized platform for managing prompt templates acros
    ```
 
 4. **Access the application**
-   Open your browser and navigate to `http://localhost:5000`
+   Open your browser and navigate to `http://localhost:5173`
 
 ### Docker Container
 
@@ -43,40 +43,14 @@ Prompt Tuner provides a centralized platform for managing prompt templates acros
    docker build -t prompt-tuner .
    
    # Run the container
-   docker run -p 5000:5000 prompt-tuner
+   docker run -p 5173:5173 prompt-tuner
    ```
 
-The application will be available at `http://localhost:5000`
+The application will be available at `http://localhost:5173`
 
-## Project Structure
+## Documentation
 
-```
-prompt-tuner/
-├── app/
-│   ├── static/
-│   │   ├── css/           # Modular CSS files for each page
-│   │   ├── js/            # Alpine.js components and API logic
-│   │   └── images/        # Application assets and icons
-│   └── templates/         # Jinja2 HTML templates
-├── config/                # Configuration files
-├── docs/                  # Documentation
-├── scripts/               # Build and deployment scripts
-├── tests/                 # Test suite
-├── docker-compose.yml
-├── Dockerfile
-├── pyproject.toml
-└── uv.lock
-```
+For detailed information and guides, check out our comprehensive documentation in the `docs/` folder:
 
-**Notable Directories:**
-- [`app/static/js/`](app/static/js/) - Contains JavaScript modules for page-specific functionality and API configuration
-- [`app/static/css/`](app/static/css/) - Page-specific stylesheets with modern CSS features like backdrop filters and CSS Grid
-- [`app/templates/`](app/templates/) - Jinja2 templates with Alpine.js directives for reactive behavior
-
-## Architecture Highlights
-
-The application uses a **component-based architecture** where each page ([`index.html`](app/templates/index.html) - workflow hub, [`manage-prompt.html`](app/templates/manage-prompt.html), [`evaluation.html`](app/templates/evaluation.html), [`workflow-process.html`](app/templates/workflow-process.html)) has dedicated CSS and JavaScript files for modular functionality.
-
-**API Integration:** The app communicates with external workflow APIs through a centralized configuration system in [`api.js`](app/static/js/api.js), enabling easy endpoint management and environment switching.
-
-**Containerization:** Docker setup with multi-stage builds using Python 3.12 slim base image, optimized for production deployment with health checks and non-root user security.
+- **[User Guide](docs/user-guide.md)** - Complete guide on how to use the application
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
