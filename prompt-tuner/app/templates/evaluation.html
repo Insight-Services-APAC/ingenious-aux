@@ -18,23 +18,6 @@
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     
-    <!-- API Configuration -->
-    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
-
-    <!-- Utility Scripts -->
-    <script src="{{ url_for('static', filename='js/base-manager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/display-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/validation-utils.js') }}"></script>
-    
-    <!-- Modular JavaScript Components -->
-    <script src="{{ url_for('static', filename='js/data-manager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/array-manager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/dynamic-workflow.js') }}"></script>
-    
-    <!-- Load modular JS files in dependency order -->
-    <script src="{{ url_for('static', filename='js/json-response-builder.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/prompt-evaluation-core.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/prompt-evaluation-app.js') }}"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -250,6 +233,23 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- API Configuration -->
+    <script src="{{ url_for('static', filename='js/config/api.js') }}"></script>
+
+    <!-- Utility Scripts -->
+    <script src="{{ url_for('static', filename='js/manager/base-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils/display-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils/validation-utils.js') }}"></script>
+    
+    <!-- Modular JavaScript Components -->
+    <script src="{{ url_for('static', filename='js/manager/data-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/manager/array-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/manager/dynamic-workflow.js') }}"></script>
+    
+    <!-- Load modular JS files in dependency order -->
+    <script src="{{ url_for('static', filename='js/utils/json-response-builder.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/prompt-evaluation-core.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/prompt-evaluation-app.js') }}"></script>
 
 </body>
 </html>
