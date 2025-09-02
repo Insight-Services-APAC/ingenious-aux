@@ -227,10 +227,12 @@ class DynamicWorkflowManager {
         } catch (error) {
             console.error('Failed to load schema form:', error);
             this.dynamicFormHtml = `
-                <div class="enhanced-card">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">❌</div>
-                        <p>Failed to load schema form</p>
+                <div class="text-center py-5">
+                    <div class="alert alert-info border-0" style="background-color: #f8f9fa;">
+                        <h5 class="text-danger mb-2">Not Found</h5>
+                        <p class="text-muted mb-0">
+                            Please check the workflow schema configuration.
+                        </p>
                     </div>
                 </div>
             `;
