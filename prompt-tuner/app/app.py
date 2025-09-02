@@ -3,7 +3,8 @@ Flask Application Entry Point
 """
 
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
+from .utils import get_health_status
 
 
 def create_app():
@@ -12,6 +13,11 @@ def create_app():
     
     # Minimal required config
     app.config['DEBUG'] = True
+    
+    @app.route('/health')
+    def health_check():
+        """Health check endpoint for Docker and monitoring"""
+        return jsonify(get_health_status()), 200
     
     @app.route('/')
     def index():
