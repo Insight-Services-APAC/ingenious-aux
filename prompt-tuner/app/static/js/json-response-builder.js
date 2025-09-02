@@ -415,6 +415,18 @@ class JSONResponseBuilder {
                     }
                 }
                 
+                // This handles cases like bike_sales_0_product_code -> product_code
+                if (isNestedArrayField) {
+                    const mainPattern = new RegExp(`^${actualArrayField.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}_\\d+_(.+)$`);
+                    patterns.push({
+                        regex: mainPattern,
+                        arrayField: actualArrayField,
+                        type: 'nested_array_main',
+                        captureGroup: 1
+                    });
+                    console.log(`  🎯 Created main nested array pattern: ${actualArrayField}_N_* -> capture group 1`);
+                }
+                
                 // Handle nested objects (including reference fields within the structure)
                 Object.entries(structure.nestedObjects || {}).forEach(([objName, objStructure]) => {
                     console.log(`  🔍 Processing nested object: ${objName}`, objStructure);
@@ -993,6 +1005,13 @@ class JSONResponseBuilder {
                             }
                             nestedObjects[refField][refProp] = value;
                             console.log(`→ Created reference nested field: ${refField}.${refProp} = ${value}`);
+                            processed = true;
+                            break;
+                        } else if (pattern.type === 'nested_array_main') {
+                            // Handle the main nested array pattern: bike_sales_0_product_code -> product_code
+                            cleanKey = match[pattern.captureGroup || 1];
+                            cleanItem[cleanKey] = value;
+                            console.log(`→ Cleaned main nested array field: ${key} -> ${cleanKey} = ${value}`);
                             processed = true;
                             break;
                         } else if (pattern.type === 'direct') {
