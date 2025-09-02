@@ -29,6 +29,10 @@ def create_app():
     def prompt_evaluation():
         return render_template('evaluation.html')
 
+    @app.route('/results')
+    def results():
+        return render_template('results.html')
+
     return app
 
 

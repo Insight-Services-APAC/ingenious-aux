@@ -12,30 +12,30 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <!-- Custom CSS -->
-    <link href="../static/css/style.css" rel="stylesheet">
-    <link href="../static/css/prompt-evaluation.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/evaluation.css') }}" rel="stylesheet">
     
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     
     <!-- API Configuration -->
-    <script src="../static/js/api.js"></script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
 
     <!-- Utility Scripts -->
-    <script src="../static/js/base-manager.js"></script>
-    <script src="../static/js/display-utils.js"></script>
-    <script src="../static/js/validation-utils.js"></script>
+    <script src="{{ url_for('static', filename='js/base-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/display-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/validation-utils.js') }}"></script>
     
     <!-- Modular JavaScript Components -->
-    <script src="../static/js/data-manager.js"></script>
-    <script src="../static/js/array-manager.js"></script>
-    <script src="../static/js/dynamic-workflow.js"></script>
+    <script src="{{ url_for('static', filename='js/data-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/array-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dynamic-workflow.js') }}"></script>
     
     <!-- Load modular JS files in dependency order -->
-    <script src="../static/js/json-response-builder.js"></script>
-    <script src="../static/js/chat-response-parser.js"></script>
-    <script src="../static/js/prompt-evaluation-core.js"></script>
-    <script src="../static/js/prompt-evaluation-app.js"></script>
+    <script src="{{ url_for('static', filename='js/json-response-builder.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat-response-parser.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/prompt-evaluation-core.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/prompt-evaluation-app.js') }}"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -221,10 +221,6 @@
                     <button class="btn btn-outline-primary me-3" @click="goToEvaluation()">
                         <i class="bi bi-arrow-left"></i>
                         Back to Evaluation
-                    </button>
-                    <button class="btn btn-success" @click="downloadResults()">
-                        <i class="bi bi-download"></i>
-                        Download Results
                     </button>
                 </div>
             </div>

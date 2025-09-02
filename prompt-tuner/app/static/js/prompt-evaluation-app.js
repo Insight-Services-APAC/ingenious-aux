@@ -29,7 +29,11 @@ function promptEvaluationApp() {
         revisions: [],
         workflowQueryParam: null,
         formDataExists: false,
-        evaluationId: '',
+        
+        // JSON Preview state
+        showJsonPreview: false,
+        jsonViewType: 'raw',
+        currentJsonData: null,
         
         // Initialization
         async init() {
@@ -59,10 +63,6 @@ function promptEvaluationApp() {
 
         createFormattedJsonStructure(formData) {
             // DEBUG: Log schema construction details
-            console.log('=== createFormattedJsonStructure (app.js) DEBUG ===');
-            console.log('currentSchema:', this.currentSchema);
-            console.log('window.dynamicWorkflow exists:', !!window.dynamicWorkflow);
-            console.log('currentSchemaData exists:', !!window.dynamicWorkflow?.currentSchemaData);
             if (window.dynamicWorkflow?.currentSchemaData) {
                 console.log('currentSchemaData structure:', JSON.stringify(window.dynamicWorkflow.currentSchemaData, null, 2));
             }
@@ -85,7 +85,6 @@ function promptEvaluationApp() {
             } else {
                 console.log('No currentSchemaData available, using schemaObject:', schemaObject);
             }
-            console.log('=== END app.js DEBUG ===');
             
             return JSONResponseBuilder.createFormattedJsonStructure(
                 formData, 
@@ -95,8 +94,27 @@ function promptEvaluationApp() {
             );
         },
 
-        logFormDataToConsole() {
-            return PromptEvaluationCore.logFormDataToConsole(this);
+        constructRawJson() {
+            return PromptEvaluationCore.constructRawJson(this);
+        },
+
+        // Build and log the final JSON payload in the required format
+        constructFinalJson() {
+            try {
+                // Use the core function to get formatted data and log it
+                const formattedData = PromptEvaluationCore.constructRawJson(this);
+
+
+                // Use the inner payload for user_prompt, and conversation_flow from formattedData
+                const finalJson = {
+                    user_prompt: JSON.stringify(formattedData.user_prompt),
+                    conversation_flow: formattedData.conversation_flow
+                };
+
+                return finalJson;
+            } catch (err) {
+                console.error('Failed to build final JSON:', err);
+            }
         },
         
         // Complex functions delegated to external modules
@@ -163,7 +181,7 @@ function promptEvaluationApp() {
         getAvailableVersions() {
             return this.revisions.map(revision => ({
                 id: revision.id,
-                display: `${revision.name} (${revision.date})`,
+                display: `${revision.name} (${revision.description})`,
                 date: revision.date,
                 status: revision.status
             }));
@@ -173,8 +191,10 @@ function promptEvaluationApp() {
             this.isRunning = false;
             this.hasResults = false;
             this.results = null;
-            // Don't reset form data - keep inputs intact for "Run Again"
-            // Only reset the evaluation results, not the form inputs
+            if (window.dynamicWorkflow) {
+                window.dynamicWorkflow.resetAll();
+                this.syncState();
+            }
         },
         
         formatWorkflowOutput(output) {
@@ -207,6 +227,46 @@ function promptEvaluationApp() {
         
         hasAnyFormData() {
             return this.formDataExists;
+        },
+
+        // Format agent names like "fiscal_analysis_agent" -> "Fiscal Analysis Agent"
+        formatAgentName(rawName) {
+            try {
+                if (!rawName || typeof rawName !== 'string') return 'Agent';
+                // Normalize separators to spaces
+                let s = rawName.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+                if (!s) return 'Agent';
+
+                const ACRONYMS = new Set(['ai', 'nps', 'nsw', 'usa', 'uk', 'eu', 'id']);
+
+                const words = s.split(' ');
+                const titled = words.map(w => {
+                    const lower = w.toLowerCase();
+                    if (ACRONYMS.has(lower)) return lower.toUpperCase();
+                    // Preserve already-cased words reasonably
+                    return lower.charAt(0).toUpperCase() + lower.slice(1);
+                });
+                return titled.join(' ');
+            } catch (_) {
+                return rawName || 'Agent';
+            }
+        },
+        
+        // JSON Preview functionality
+        toggleJsonPreview() {
+            return PromptEvaluationCore.toggleJsonPreview(this);
+        },
+        
+        updateJsonPreview() {
+            return PromptEvaluationCore.updateJsonPreview(this);
+        },
+        
+        formatJsonForDisplay(jsonData) {
+            return PromptEvaluationCore.formatJsonForDisplay(jsonData);
+        },
+        
+        downloadCurrentJson() {
+            return PromptEvaluationCore.downloadCurrentJson(this);
         }
     };
 }

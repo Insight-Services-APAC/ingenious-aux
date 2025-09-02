@@ -261,7 +261,7 @@ class PromptEvaluationCore {
     /**
      * Console logging functionality
      */
-    static logFormDataToConsole(app) {
+    static constructRawJson(app) {
         app.forceDataSync();
         
         const formData = app.getFormDataForSchema();
@@ -590,7 +590,7 @@ class PromptEvaluationCore {
             }
 
             // Build final JSON expected by backend
-            const finalJson = app.logFinalJsonToConsole();
+            const finalJson = app.constructFinalJson();
 
             // Resolve API URL for chat
             const base = window.API_CONFIG?.baseUrl || 'http://localhost:8000';
@@ -798,6 +798,155 @@ class PromptEvaluationCore {
         link.download = `${app.workflow.name.replace(/\s+/g, '_')}_evaluation_${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Toggle JSON Preview functionality
+     */
+    static toggleJsonPreview(app) {
+        app.showJsonPreview = !app.showJsonPreview;
+        
+        if (app.showJsonPreview) {
+            // Initialize with Raw JSON by default
+            app.jsonViewType = 'raw';
+            this.updateJsonPreview(app);
+        } else {
+            // Clear data when hiding
+            app.currentJsonData = null;
+        }
+    }
+
+    /**
+     * Update JSON Preview content based on selected view type
+     */
+    static updateJsonPreview(app) {
+        try {
+            // Force data synchronization before generating JSON
+            app.forceDataSync();
+            
+            const formData = app.getFormDataForSchema();
+            
+            if (!formData || Object.keys(formData).length === 0) {
+                app.currentJsonData = {
+                    "_note": "No form data available",
+                    "_suggestion": "Please fill out the form fields and try again",
+                    "_schema": app.currentSchema || "No schema selected",
+                    "_timestamp": new Date().toISOString()
+                };
+                return;
+            }
+
+            if (app.jsonViewType === 'raw') {
+                // Generate Raw JSON (same as constructRawJson)
+                const schemaInfo = this.getSchemaInfo(app);
+                const transformedData = JSONResponseBuilder.transformFormDataForStores(formData, schemaInfo);
+                
+                // Get full schema object for dynamic field extraction
+                let fullSchemaObject = null;
+                if (window.dynamicWorkflow && window.dynamicWorkflow.currentSchemaData) {
+                    fullSchemaObject = {
+                        workflow_name: app.currentSchema,
+                        schemas: {
+                            RootModel: window.dynamicWorkflow.currentSchemaData
+                        }
+                    };
+                }
+                
+                if (!fullSchemaObject && schemaInfo && schemaInfo.containerName) {
+                    fullSchemaObject = {
+                        workflow_name: app.currentSchema,
+                        schemas: {
+                            RootModel: {
+                                properties: {
+                                    [schemaInfo.containerName]: {
+                                        type: 'array',
+                                        items: {}
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
+                
+                app.currentJsonData = JSONResponseBuilder.createFormattedJsonStructure(
+                    transformedData, 
+                    app.selectedPromptVersion, 
+                    app.currentSchema, 
+                    fullSchemaObject || schemaInfo.schema
+                );
+            } else if (app.jsonViewType === 'final') {
+                // Generate Final JSON (same as constructFinalJson)
+                const formattedData = this.constructRawJson(app);
+                
+                app.currentJsonData = {
+                    user_prompt: JSON.stringify(formattedData.user_prompt),
+                    conversation_flow: formattedData.conversation_flow
+                };
+            }
+        } catch (error) {
+            console.error('Error updating JSON preview:', error);
+            app.currentJsonData = {
+                "_error": "Failed to generate JSON preview",
+                "_details": error.message,
+                "_timestamp": new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * Format JSON data for HTML display with syntax highlighting
+     */
+    static formatJsonForDisplay(jsonData) {
+        if (!jsonData) {
+            return '<span class="text-muted">No data to display</span>';
+        }
+        
+        try {
+            const jsonString = JSON.stringify(jsonData, null, 2);
+            
+            // Simple syntax highlighting
+            const highlighted = jsonString
+                .replace(/("(?:\\.|[^"\\])*")(\s*:\s*)/g, '<span class="json-key">$1</span>$2')
+                .replace(/:\s*("(?:\\.|[^"\\])*")/g, ': <span class="json-string">$1</span>')
+                .replace(/:\s*(\d+(?:\.\d+)?)/g, ': <span class="json-number">$1</span>')
+                .replace(/:\s*(true|false)/g, ': <span class="json-boolean">$1</span>')
+                .replace(/:\s*(null)/g, ': <span class="json-null">$1</span>');
+            
+            return highlighted;
+        } catch (error) {
+            console.error('Error formatting JSON for display:', error);
+            return `<span class="text-danger">Error formatting JSON: ${error.message}</span>`;
+        }
+    }
+
+    /**
+     * Download currently displayed JSON
+     */
+    static downloadCurrentJson(app) {
+        if (!app.currentJsonData) {
+            alert('No JSON data available to download.');
+            return;
+        }
+        
+        try {
+            const jsonString = JSON.stringify(app.currentJsonData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            
+            const identifier = JSONResponseBuilder.generateCompactIdentifier();
+            const viewType = app.jsonViewType === 'final' ? 'final' : 'raw';
+            link.download = `${identifier}_${viewType}_json.json`;
+            
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            console.log(`📥 ${viewType} JSON downloaded:`, app.currentJsonData);
+        } catch (error) {
+            console.error('Error downloading JSON:', error);
+            alert(`Failed to download JSON: ${error.message}`);
+        }
     }
 }
 
