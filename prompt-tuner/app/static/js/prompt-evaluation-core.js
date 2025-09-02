@@ -268,13 +268,14 @@ class PromptEvaluationCore {
         
         if (!formData || Object.keys(formData).length === 0) {
             console.warn('📝 Form Data Logging - No data available');
-            console.log({
+            const emptyData = {
                 "_note": "No form data available",
                 "_suggestion": "Please fill out the form fields and try again",
                 "_schema": app.currentSchema || "No schema selected",
                 "_timestamp": new Date().toISOString()
-            });
-            return;
+            };
+            console.log(emptyData);
+            return emptyData;
         }
         
         // Transform the form data to handle indexed container fields (schema-driven)
@@ -326,6 +327,7 @@ class PromptEvaluationCore {
         console.log('Formatted JSON structure:', formattedData);
         console.log('JSON formatted:', JSON.stringify(formattedData, null, 2));
         console.log('=== END FORM DATA ===');
+        return formattedData;
     }
 
     /**
@@ -580,53 +582,154 @@ class PromptEvaluationCore {
         app.hasResults = false;
         
         try {
+            // Ensure we have the freshest data
+            app.forceDataSync();
             const dynamicFormData = app.getFormDataForSchema();
-            console.log('Running evaluation with modular data:', dynamicFormData);
-            
-            // Transform form data to match the required format
-            const transformedFormData = {
-                revision_id: app.selectedPromptVersion,
-                identifier: app.evaluationId,
-                ...dynamicFormData
-            };
-            
-            // Prepare the API request payload in the required format
-            const requestPayload = {
-                user_prompt: JSON.stringify(transformedFormData),
-                conversation_flow: app.currentSchema
-            };
-            
-            // Simple request body log for testing
-            console.log('REQUEST BODY:', JSON.stringify(requestPayload, null, 2));
-            
-            // Make API call to the chat endpoint
-            const response = await fetch(`${window.API_CONFIG.baseUrl}${window.API_CONFIG.endpoints.chat}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestPayload)
-            });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error Response Body:', errorText);
-                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            if (!dynamicFormData || Object.keys(dynamicFormData).length === 0) {
+                throw new Error('Please fill out the input form before running evaluation.');
             }
-            
-            const apiResponse = await response.json();
-            console.log('API response received:', apiResponse);
-            
-            // Process the API response and format for display
-            app.results = PromptEvaluationCore.processApiResponse(apiResponse, app.currentSchema, dynamicFormData);
-            
+
+            // Build final JSON expected by backend
+            const finalJson = app.logFinalJsonToConsole();
+
+            // Resolve API URL for chat
+            const base = window.API_CONFIG?.baseUrl || 'http://localhost:8000';
+            const path = window.API_CONFIG?.endpoints?.chat || '/api/v1/chat';
+            const url = `${base}${path}`;
+
+            // POST to chat endpoint with timeout and better error handling
+            let resp;
+            try {
+                // Add timeout to fetch request
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+                
+                resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(finalJson),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+            } catch (fetchError) {
+                if (fetchError.name === 'AbortError') {
+                    throw new Error('Request timeout - The evaluation took too long to complete. Try reducing the complexity of your input data.');
+                } else if (fetchError.message.includes('NetworkError') || fetchError.message.includes('fetch')) {
+                    throw new Error('Network connection error - Please check your internet connection and try again.');
+                } else {
+                    throw new Error(`Network error: ${fetchError.message}`);
+                }
+            }
+
+            if (!resp.ok) {
+                let errorText = 'Unknown error';
+                try {
+                    errorText = await resp.text();
+                } catch (e) {
+                    errorText = `HTTP ${resp.status} ${resp.statusText}`;
+                }
+                throw new Error(`Chat API error ${resp.status}: ${errorText}`);
+            }
+
+            // Capture raw response text first for robust parsing
+            const rawText = await resp.clone().text();
+            // Debug: Log raw response (truncated)
+            try {
+                const preview = rawText ? rawText.slice(0, 1000) : '';
+                console.log('[ChatAPI] Raw response preview (<=1000 chars):', preview);
+            } catch (_) {}
+            let data;
+            const contentType = resp.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                data = await resp.json();
+            } else {
+                // Fallback: treat as text
+                data = { message: rawText };
+            }
+
+            // Debug: Log parsed response summary
+            try {
+                console.log('[ChatAPI] Parsed response type:', typeof data);
+                if (data && typeof data === 'object') {
+                    console.log('[ChatAPI] Parsed response keys:', Object.keys(data));
+                }
+            } catch (_) {}
+
+            // Normalize results for display
+            const workflowOutput = typeof data === 'string' ? data : (data.message || data.output || JSON.stringify(data));
+            const agentResults = Array.isArray(data.agentResults) ? data.agentResults : [];
+
+            // Parse agent interactions using chat-response-parser.js if available
+            let parsedAgentResponses = [];
+            try {
+                const parserFn = (typeof window !== 'undefined') ? window.parseAgentResponses : (typeof parseAgentResponses !== 'undefined' ? parseAgentResponses : null);
+                if (typeof parserFn === 'function') {
+                    // Prefer the exact raw response body first
+                    console.log('[Parser] Calling parseAgentResponses with rawText length:', rawText ? rawText.length : 0);
+                    let parsedJsonString = parserFn(rawText);
+                    console.log('[Parser] Returned string length (rawText attempt):', parsedJsonString ? parsedJsonString.length : 0);
+                    // If that returns empty, try structured fallbacks
+                    if (parsedJsonString === '[]' || parsedJsonString === null || parsedJsonString === undefined) {
+                        const rawForParser =
+                            (typeof data.agent_response !== 'undefined' ? data.agent_response :
+                            typeof data.agent_interactions !== 'undefined' ? data.agent_interactions :
+                            typeof data.agentResults !== 'undefined' ? data.agentResults :
+                            typeof data.message !== 'undefined' ? data.message :
+                            typeof data.output !== 'undefined' ? data.output : data);
+                        const parserInput = typeof rawForParser === 'string' ? rawForParser : JSON.stringify(rawForParser);
+                        console.log('[Parser] Fallback call with parserInput type:', typeof rawForParser);
+                        parsedJsonString = parserFn(parserInput);
+                        console.log('[Parser] Returned string length (fallback attempt):', parsedJsonString ? parsedJsonString.length : 0);
+                    }
+                    try {
+                        parsedAgentResponses = JSON.parse(parsedJsonString);
+                        console.log('[Parser] Parsed responses count:', Array.isArray(parsedAgentResponses) ? parsedAgentResponses.length : 0);
+                    } catch (e) {
+                        console.warn('Failed to JSON.parse parsed agent responses string; using empty array.', e);
+                        parsedAgentResponses = [];
+                    }
+                } else {
+                    console.warn('parseAgentResponses is not available on window. Skipping agent parsing.');
+                }
+            } catch (e) {
+                console.warn('Agent response parsing failed:', e);
+            }
+
+            app.results = { workflowOutput, agentResults, parsedAgentResponses };
+
             app.isRunning = false;
             app.hasResults = true;
             
+            console.log('Evaluation completed successfully:', app.results);
+            
+            // Get workflow parameters for redirect
+            const urlParams = new URLSearchParams(window.location.search);
+            const workflowId = urlParams.get('workflow') || app.currentSchema || 'unknown';
+            const revisionId = app.selectedPromptVersion || 'latest';
+            
+            // Store results in sessionStorage for the results page
+            const storageKey = `evaluation_results_${workflowId}_${revisionId}`;
+            try {
+                sessionStorage.setItem(storageKey, JSON.stringify(app.results));
+            } catch (storageError) {
+                console.warn('Failed to store results in sessionStorage:', storageError);
+            }
+            
+            // Small delay to ensure state is updated and storage is saved before redirect
+            setTimeout(() => {
+                window.location.href = `/results?id=${encodeURIComponent(workflowId)}&revision_id=${encodeURIComponent(revisionId)}`;
+            }, 500);
+            
         } catch (error) {
             console.error('Error running evaluation:', error);
+            
+            // Reset the running state and show error message
             app.isRunning = false;
-            alert('Error running evaluation: ' + error.message);
+            app.hasResults = false;
+            
+            // Show a simple alert with the error message
+            alert(`Evaluation failed: ${error.message}`);
         }
     }
 
@@ -643,174 +746,30 @@ class PromptEvaluationCore {
     }
 
     /**
-     * Process API response and format for display
-     */
-    static processApiResponse(apiResponse, workflowName, inputData) {
-        try {
-            console.log('Processing API response:', apiResponse);
-            
-            // Extract the main workflow output
-            let workflowOutput = 'No output received';
-            
-            // Check if we have agent_response data
-            if (apiResponse.agent_response) {
-                try {
-                    // Parse the agent_response string to JSON
-                    const agentResponseData = JSON.parse(apiResponse.agent_response);
-                    console.log('Parsed agent response data:', agentResponseData);
-                    
-                    // Find the summary agent response for the main workflow output
-                    const summaryAgent = agentResponseData.find(agent => 
-                        agent.__dict__?.chat_name === 'summary'
-                    );
-                    
-                    if (summaryAgent && summaryAgent.__dict__?.chat_response?.chat_message?.__dict__?.content) {
-                        workflowOutput = summaryAgent.__dict__.chat_response.chat_message.__dict__.content;
-                    } else {
-                        // Fallback to first agent's response
-                        const firstAgent = agentResponseData[0];
-                        if (firstAgent && firstAgent.__dict__?.chat_response?.chat_message?.__dict__?.content) {
-                            workflowOutput = firstAgent.__dict__.chat_response.chat_message.__dict__.content;
-                        }
-                    }
-                } catch (parseError) {
-                    console.error('Error parsing agent_response:', parseError);
-                    workflowOutput = 'Error parsing agent response data';
-                }
-            }
-            
-            // Process agent results if available
-            const agentResults = [];
-            
-            if (apiResponse.agent_response) {
-                try {
-                    const agentResponseData = JSON.parse(apiResponse.agent_response);
-                    
-                    agentResponseData.forEach((agent, index) => {
-                        const agentDict = agent.__dict__;
-                        if (!agentDict) return;
-                        
-                        const chatResponse = agentDict.chat_response?.chat_message?.__dict__;
-                        const agentName = agentDict.chat_name || `agent_${index + 1}`;
-                        
-                        // Clean up agent display name
-                        const displayName = BaseManager.cleanDisplayName(agentName);
-                        
-                        agentResults.push({
-                            agentName: agentName,
-                            displayName: displayName,
-                            output: chatResponse?.content || 'No output available',
-                            tokensUsed: (agentDict.prompt_tokens || 0) + (agentDict.completion_tokens || 0),
-                            model: chatResponse?.models_usage?.model || 'Unknown',
-                            executionTime: agentDict.end_time && agentDict.start_time ? 
-                                Math.round((agentDict.end_time - agentDict.start_time) * 1000) : 0,
-                            expanded: false, // For UI state
-                            promptTokens: agentDict.prompt_tokens || 0,
-                            completionTokens: agentDict.completion_tokens || 0
-                        });
-                    });
-                } catch (parseError) {
-                    console.error('Error processing individual agents:', parseError);
-                }
-            }
-            
-            // If no agent results, create a default entry from the main response
-            if (agentResults.length === 0) {
-                agentResults.push({
-                    agentName: 'workflow_agent',
-                    displayName: 'Workflow Agent',
-                    output: workflowOutput,
-                    tokensUsed: apiResponse.token_count || 0,
-                    model: 'Unknown',
-                    executionTime: 0,
-                    expanded: false,
-                    promptTokens: 0,
-                    completionTokens: apiResponse.token_count || 0
-                });
-            }
-            
-            return {
-                workflowOutput,
-                agentResults,
-                evaluationId: apiResponse.message_id || null,
-                threadId: apiResponse.thread_id || null,
-                totalTokens: apiResponse.token_count || 0,
-                timestamp: new Date().toISOString()
-            };
-            
-        } catch (error) {
-            console.error('Error processing API response:', error);
-            return {
-                workflowOutput: 'Error processing response: ' + error.message,
-                agentResults: [],
-                evaluationId: null,
-                threadId: null,
-                totalTokens: 0,
-                timestamp: new Date().toISOString()
-            };
-        }
-    }
-
-    /**
      * Load revisions from API
      */
     static async loadRevisionsFromAPI(app) {
         try {
-            console.log('Loading revisions from API for workflow:', app.workflowQueryParam);
-            
-            // Fetch workflows list from the API
-            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.workflowsList}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('Workflows API Response:', data);
-            
-            if (app.workflowQueryParam) {
-                // Find the specific workflow
-                const workflow = data.workflows.find(w => w.workflow === app.workflowQueryParam);
-                
-                if (workflow && workflow.prompt_files && workflow.prompt_files.length > 0) {
-                    // Create revisions data based on the workflow's revision_id (only if prompt files exist)
-                    app.revisions = [{
-                        id: workflow.revision_id,
-                        name: workflow.revision_id,
-                        date: new Date().toISOString().split('T')[0],
-                        description: `Revision ${workflow.revision_id}`,
-                        author: 'System',
-                        status: 'active'
-                    }];
-                    
-                    console.log('Successfully loaded revisions:', app.revisions);
-                } else {
-                    console.log('Workflow not found or no prompt files available:', app.workflowQueryParam);
-                    app.revisions = [];
+            app.revisions = [
+                {
+                    id: 'test-v2',
+                    name: 'test-v2',
+                    date: new Date().toISOString().split('T')[0],
+                    description: 'Enhanced modular architecture',
+                    author: 'System',
+                    status: 'latest'
+                },
+                {
+                    id: 'test-v1',
+                    name: 'test-v1',
+                    date: '2024-03-10',
+                    description: 'Production stable',
+                    author: 'System',
+                    status: 'stable'
                 }
-            } else {
-                // If no specific workflow, collect all unique revisions from workflows that have prompt files
-                const uniqueRevisions = new Map();
-                
-                data.workflows.forEach(workflow => {
-                    if (workflow.revision_id && workflow.prompt_files && workflow.prompt_files.length > 0 && !uniqueRevisions.has(workflow.revision_id)) {
-                        uniqueRevisions.set(workflow.revision_id, {
-                            id: workflow.revision_id,
-                            name: workflow.revision_id,
-                            date: new Date().toISOString().split('T')[0],
-                            description: `Revision ${workflow.revision_id}`,
-                            author: 'System',
-                            status: 'active'
-                        });
-                    }
-                });
-                
-                app.revisions = Array.from(uniqueRevisions.values());
-                console.log('Successfully loaded all available revisions with prompt files:', app.revisions);
-            }
+            ];
         } catch (error) {
-            console.error('Error loading revisions from API:', error);
-            // Fallback to empty array instead of hardcoded data
+            console.error('Error loading revisions:', error);
             app.revisions = [];
         }
     }
