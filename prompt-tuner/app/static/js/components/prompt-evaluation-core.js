@@ -825,6 +825,7 @@ class PromptEvaluationCore {
             workflow: app.workflow.name,
             schema: app.currentSchema,
             timestamp: new Date().toISOString(),
+            evaluationId: app.evaluationId,
             promptVersion: app.selectedPromptVersion,
             inputData: app.getFormDataForSchema(),
             workflowOutput: app.results.workflowOutput,
@@ -836,7 +837,14 @@ class PromptEvaluationCore {
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${app.workflow.name.replace(/\s+/g, '_')}_evaluation_${new Date().toISOString().split('T')[0]}.json`;
+        
+        // Create filename with prompt version and evaluation ID
+        const workflowName = app.workflow.name.replace(/\s+/g, '_');
+        const promptVersion = app.selectedPromptVersion || 'unknown';
+        const evaluationId = app.evaluationId || 'no-id';
+        const dateStr = new Date().toISOString().split('T')[0];
+        
+        link.download = `${workflowName}_v${promptVersion}_eval${evaluationId}_${dateStr}.json`;
         link.click();
         URL.revokeObjectURL(url);
     }
