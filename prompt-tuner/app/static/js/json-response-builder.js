@@ -11,16 +11,14 @@ class JSONResponseBuilder {
     /**
      * Extract container field name from schema (e.g., "stores", "shops", "services", etc.)
      * @param {Object} schemaObject - The schema object to analyze
-     * @param {string} currentSchemaName - The current schema name (for loading schema file if needed)
      * @returns {string} The container field name
      */
-    static extractContainerFieldName(schemaObject, currentSchemaName = null) {
+    static extractContainerFieldName(schemaObject) {
         try {
             console.log('=== extractContainerFieldName DEBUG ===');
             console.log('schemaObject:', schemaObject);
-            console.log('currentSchemaName:', currentSchemaName);
 
-            // Method 1: Try dynamic extraction from provided schema object
+            // Dynamic extraction from provided schema object
             if (schemaObject && schemaObject.schemas && schemaObject.schemas.RootModel) {
                 const rootModelProperties = schemaObject.schemas.RootModel.properties;
                 if (rootModelProperties) {
@@ -34,73 +32,15 @@ class JSONResponseBuilder {
                 }
             }
 
-            // Method 2: Try to extract from direct schema properties (if schema is passed directly)
-            if (schemaObject && schemaObject.properties && !schemaObject.schemas) {
-                for (const [propName, propConfig] of Object.entries(schemaObject.properties)) {
-                    if (propConfig.type === 'array') {
-                        console.log(`✅ Direct schema container field detected: ${propName}`);
-                        return propName;
-                    }
-                }
-            }
-
-            // Method 3: Try to load and parse the schema file dynamically
-            if (currentSchemaName) {
-                console.log(`⚠️ Schema object incomplete, attempting to load schema file: ${currentSchemaName}`);
-                return this.extractContainerFromSchemaFile(currentSchemaName);
-            }
-
-            console.error('❌ No valid schema object or schema name provided');
+            console.error('❌ No valid schema object provided');
             throw new Error('Cannot extract container field name: No valid schema data available');
 
         } catch (error) {
             console.error('Error extracting container field name:', error);
-            
-            // Final attempt: Try to load schema file if we have a schema name
-            if (currentSchemaName) {
-                try {
-                    return this.extractContainerFromSchemaFile(currentSchemaName);
-                } catch (fileError) {
-                    console.error('Failed to load schema file as fallback:', fileError);
-                }
-            }
-            
-            throw new Error(`Unable to determine container field name for schema: ${currentSchemaName || 'unknown'}`);
+            throw new Error('Unable to determine container field name from provided schema object');
         }
     }
 
-    /**
-     * Extract container field name from schema file (synchronous approach using cached data)
-     * @param {string} schemaName - Name of the schema file
-     * @returns {string} The container field name
-     */
-    static extractContainerFromSchemaFile(schemaName) {
-        try {
-            // Try to get from window.dynamicWorkflow cache first
-            if (window.dynamicWorkflow && window.dynamicWorkflow.schemaCache && window.dynamicWorkflow.schemaCache[schemaName]) {
-                const cachedSchema = window.dynamicWorkflow.schemaCache[schemaName];
-                console.log('Using cached schema:', cachedSchema);
-                
-                if (cachedSchema.schemas && cachedSchema.schemas.RootModel && cachedSchema.schemas.RootModel.properties) {
-                    const properties = cachedSchema.schemas.RootModel.properties;
-                    for (const [propName, propConfig] of Object.entries(properties)) {
-                        if (propConfig.type === 'array') {
-                            console.log(`✅ Container field from cached schema: ${propName}`);
-                            return propName;
-                        }
-                    }
-                }
-            }
-
-            // If no cache available, we need to indicate this needs to be handled differently
-            console.warn(`⚠️ Schema ${schemaName} not found in cache, cannot extract container field synchronously`);
-            throw new Error(`Schema ${schemaName} not available in cache for synchronous extraction`);
-            
-        } catch (error) {
-            console.error('Error extracting container from schema file:', error);
-            throw error;
-        }
-    }
 
     /**
      * Extract array field patterns from schema for cleanup operations
@@ -144,13 +84,12 @@ class JSONResponseBuilder {
                 });
             }
 
-            // If nothing found, return empty (no hardcoded fallbacks)
+            // If nothing found, return empty 
             if (patterns.length === 0) {
                 console.warn('No array field patterns detected in schema');
                 return [];
             }
 
-            console.log(`Dynamic array field patterns detected: ${patterns}`);
             return patterns;
         } catch (error) {
             console.error('Error extracting array field patterns:', error);
@@ -581,7 +520,7 @@ class JSONResponseBuilder {
         console.log('formData keys:', Object.keys(formData));
         
         // Extract dynamic container field name from schema
-        const containerFieldName = this.extractContainerFieldName(schemaObject, currentSchema);
+    const containerFieldName = this.extractContainerFieldName(schemaObject);
         console.log('Extracted containerFieldName:', containerFieldName);
         
         // Extract schema info for dynamic processing
