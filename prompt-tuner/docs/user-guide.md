@@ -6,13 +6,13 @@ This simple guide explains how to navigate and use the Prompt Tuner application 
 
 Prompt Tuner follows a structured workflow to help users manage and optimize their AI workflow prompts:
 
-### 1. Workflow Hub (`index.html`)
+### 1. Workflow Hub (`/`)
 **Starting Point** - The main dashboard where users can:
 - View all available workflows fetched from your backend APIs
 - Browse workflow descriptions and status
 - Select a specific workflow to work with
 
-### 2. Workflow Process (`workflow-process.html`)
+### 2. Workflow Process (`/workflow-process`)
 **Understanding Your Workflow** - Detailed view that shows:
 - How agents work together in the selected workflow
 - The sequence of operations to achieve specific goals
@@ -22,7 +22,7 @@ Prompt Tuner follows a structured workflow to help users manage and optimize the
 - **Manage Prompts** - View, Edit and create prompt templates
 - **Evaluation** - Test and analyze workflow performance
 
-### 3. Manage Prompts (`manage-prompt.html`)
+### 3. Manage Prompts (`/manage-prompt`)
 **Prompt Template Management** - Interface for:
 - **Viewing** existing prompt templates and revisions
 - **Editing** current prompts with version control
@@ -35,7 +35,7 @@ Prompt Tuner follows a structured workflow to help users manage and optimize the
 - Template validation
 - Backup and restore capabilities
 
-### 4. Evaluation (`evaluation.html`)
+### 4. Evaluation (`/evaluation`)
 **Testing and Analysis** - Testing environment where users can:
 - **Run workflows** with selected prompt templates revision
 - **Analyze results** at both workflow and individual agent levels
