@@ -518,6 +518,11 @@ class PromptEvaluationCore {
             return;
         }
         
+        if (!app.selectedPromptVersion) {
+            alert('Please select a prompt version before downloading JSON.');
+            return;
+        }
+        
         const schemaInfo = this.getSchemaInfo(app);
         const transformedData = JSONResponseBuilder.transformFormDataForStores(formData, schemaInfo);
         
@@ -554,19 +559,19 @@ class PromptEvaluationCore {
             transformedData, 
             app.selectedPromptVersion, 
             app.currentSchema, 
-            fullSchemaObject || schemaInfo.schema
+            fullSchemaObject || schemaInfo.schema,
+            app.evaluationId
         );
         const jsonString = JSON.stringify(downloadData, null, 2);
-        
+
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         
-        const identifier = JSONResponseBuilder.generateCompactIdentifier();
-        link.download = `${identifier}.json`;
-        
-        link.click();
+        // Use the evaluation ID for filename instead of generating a new identifier
+        const identifier = app.evaluationId || JSONResponseBuilder.generateCompactIdentifier();
+        link.download = `${identifier}.json`;        link.click();
         URL.revokeObjectURL(url);
         
         console.log('📥 Form data JSON downloaded (new format):', downloadData);
@@ -576,6 +581,11 @@ class PromptEvaluationCore {
      * Run evaluation with dynamic data
      */
     static async runEvaluationWithDynamicData(app) {
+        if (!app.selectedPromptVersion) {
+            alert('Please select a prompt version before running the evaluation.');
+            return;
+        }
+        
         app.isRunning = true;
         app.hasResults = false;
         

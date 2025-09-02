@@ -102,7 +102,7 @@
                         <button 
                             class="btn btn-primary px-4 me-3" 
                             @click="runEvaluationWithDynamicData()"
-                            :disabled="!currentSchema || !formDataExists"
+                            :disabled="!currentSchema || !formDataExists || !selectedPromptVersion"
                         >
                             <i class="bi bi-play-fill me-2"></i>
                             Run Evaluation
@@ -110,7 +110,7 @@
                         <button 
                             class="btn btn-outline-success px-3" 
                             @click="downloadFormDataJson()"
-                            :disabled="!currentSchema || !formDataExists"
+                            :disabled="!currentSchema || !formDataExists || !selectedPromptVersion"
                             title="Download form data as JSON file"
                         >
                             <i class="bi bi-download me-2"></i>

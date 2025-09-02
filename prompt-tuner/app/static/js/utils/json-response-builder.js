@@ -574,12 +574,13 @@ class JSONResponseBuilder {
      * @param {string|Object} currentSchema - Schema name or schema object
      * @param {Object} schemaObject - The full schema object (optional, for dynamic field extraction)
      */
-    static createFormattedJsonStructure(formData, selectedPromptVersion, currentSchema, schemaObject = null) {
+    static createFormattedJsonStructure(formData, selectedPromptVersion, currentSchema, schemaObject = null, evaluationId = null) {
         // DEBUG: Log the schema object being passed
         console.log('=== createFormattedJsonStructure DEBUG ===');
         console.log('currentSchema:', currentSchema);
         console.log('schemaObject:', schemaObject);
         console.log('formData keys:', Object.keys(formData));
+        console.log('evaluationId:', evaluationId);
         
         // Extract dynamic container field name from schema
         const containerFieldName = this.extractContainerFieldName(schemaObject, currentSchema);
@@ -762,8 +763,8 @@ class JSONResponseBuilder {
         // Use the processed container data directly
         const result = {
             user_prompt: {
-                revision_id: selectedPromptVersion || 'v1.0',
-                identifier: this.generateCompactIdentifier(),
+                revision_id: selectedPromptVersion || 'no-version-selected',
+                identifier: evaluationId || this.generateCompactIdentifier(),
                 [containerFieldName]: containerData
             },
             conversation_flow: currentSchema || 'unknown-workflow'

@@ -91,7 +91,8 @@ function promptEvaluationApp() {
                 formData, 
                 this.selectedPromptVersion, 
                 this.currentSchema, 
-                fullSchemaObject || schemaObject
+                fullSchemaObject || schemaObject,
+                this.evaluationId
             );
         },
 
