@@ -772,8 +772,8 @@ class PromptEvaluationCore {
                 // Find the specific workflow
                 const workflow = data.workflows.find(w => w.workflow === app.workflowQueryParam);
                 
-                if (workflow) {
-                    // Create revisions data based on the workflow's revision_id
+                if (workflow && workflow.prompt_files && workflow.prompt_files.length > 0) {
+                    // Create revisions data based on the workflow's revision_id (only if prompt files exist)
                     app.revisions = [{
                         id: workflow.revision_id,
                         name: workflow.revision_id,
@@ -785,15 +785,15 @@ class PromptEvaluationCore {
                     
                     console.log('Successfully loaded revisions:', app.revisions);
                 } else {
-                    console.log('Workflow not found:', app.workflowQueryParam);
+                    console.log('Workflow not found or no prompt files available:', app.workflowQueryParam);
                     app.revisions = [];
                 }
             } else {
-                // If no specific workflow, collect all unique revisions from all workflows
+                // If no specific workflow, collect all unique revisions from workflows that have prompt files
                 const uniqueRevisions = new Map();
                 
                 data.workflows.forEach(workflow => {
-                    if (workflow.revision_id && !uniqueRevisions.has(workflow.revision_id)) {
+                    if (workflow.revision_id && workflow.prompt_files && workflow.prompt_files.length > 0 && !uniqueRevisions.has(workflow.revision_id)) {
                         uniqueRevisions.set(workflow.revision_id, {
                             id: workflow.revision_id,
                             name: workflow.revision_id,
@@ -806,7 +806,7 @@ class PromptEvaluationCore {
                 });
                 
                 app.revisions = Array.from(uniqueRevisions.values());
-                console.log('Successfully loaded all available revisions:', app.revisions);
+                console.log('Successfully loaded all available revisions with prompt files:', app.revisions);
             }
         } catch (error) {
             console.error('Error loading revisions from API:', error);
