@@ -110,8 +110,8 @@ class JSONResponseBuilder {
     static extractArrayFieldPatterns(schemaObject) {
         try {
             if (!schemaObject || !schemaObject.schemas) {
-                console.warn('Invalid schema structure, using default patterns');
-                return ['bike_sales', 'laptop_sales'];
+                console.warn('Invalid schema structure; no array field patterns available');
+                return [];
             }
 
             const patterns = [];
@@ -144,17 +144,17 @@ class JSONResponseBuilder {
                 });
             }
 
-            // Fallback patterns if nothing found
+            // If nothing found, return empty (no hardcoded fallbacks)
             if (patterns.length === 0) {
-                console.warn('No array field patterns detected, using defaults');
-                return ['bike_sales', 'laptop_sales'];
+                console.warn('No array field patterns detected in schema');
+                return [];
             }
 
             console.log(`Dynamic array field patterns detected: ${patterns}`);
             return patterns;
         } catch (error) {
             console.error('Error extracting array field patterns:', error);
-            return ['bike_sales', 'laptop_sales'];
+            return [];
         }
     }
 
@@ -790,19 +790,18 @@ class JSONResponseBuilder {
      * Transform form data to handle indexed container fields (schema-driven)
      * Converts flat structure dynamically based on schema definition
      */
-    static transformFormDataForStores(formData, schemaInfo = null) {
+    static transformFormDataForStores(formData, schemaInfo) {
         const transformedData = { ...formData };
         const containerIndexedFields = {};
         
         // Get schema information to determine container name and array patterns
-        const info = schemaInfo || { 
-            containerName: 'stores',
-            arrayFieldPatterns: ['bike_sales', 'laptop_sales'],
-            dynamicPatterns: []
-        };
+        if (!schemaInfo || !schemaInfo.containerName) {
+            throw new Error('Schema info with a valid containerName is required for transformation');
+        }
+        const info = schemaInfo;
         const containerName = info.containerName;
-        const arrayFieldPatterns = info.arrayFieldPatterns;
-        const dynamicPatterns = info.dynamicPatterns || [];
+        const arrayFieldPatterns = Array.isArray(info.arrayFieldPatterns) ? info.arrayFieldPatterns : [];
+        const dynamicPatterns = Array.isArray(info.dynamicPatterns) ? info.dynamicPatterns : [];
         
         console.log('Using schema-driven transformation:', {
             containerName,
@@ -883,10 +882,24 @@ class JSONResponseBuilder {
      * Clean up field names and create nested objects from flat structure (schema-driven)
      * Uses dynamic patterns from schema analysis for precise field transformation
      */
-    static cleanupFieldNames(item, arrayFieldPatterns = ['bike_sales', 'laptop_sales'], dynamicPatterns = []) {
+    static cleanupFieldNames(item, arrayFieldPatterns = [], dynamicPatterns = []) {
         const cleanItem = {};
         const nestedObjects = {};
-        let unionTypeSelected = null;
+        // Track union fields encountered and their selected discriminator values
+        const unionSelections = {};
+        const unionFieldsDetected = new Set();
+        // Helper to format union discriminator labels (e.g., "rootmodel_mountainbike" -> "MountainBike")
+        const formatUnionTypeLabel = (raw) => {
+            if (typeof raw !== 'string') return raw;
+            // Handle JSON schema refs like #/$defs/RootModel_MountainBike
+            const refMatch = raw.match(/#\/+\$defs\/(.+)$/i);
+            let s = refMatch ? refMatch[1] : raw;
+            // Strip common prefixes
+            s = s.replace(/^rootmodel_/i, '').replace(/^RootModel_/i, '');
+            // Split on non-alphanumerics and PascalCase
+            const parts = s.split(/[_\s-]+/).filter(Boolean);
+            return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+        };
         
         console.log('=== cleanupFieldNames DEBUG ===');
         console.log('Input item:', item);
@@ -922,10 +935,11 @@ class JSONResponseBuilder {
                             nestedObjects[unionField][unionProp] = value;
                             console.log(`→ Nested union field: ${unionField}.${unionProp} = ${value}`);
 
-                            // Detect union type from form data if available (do not overwrite object later)
-                            if (!unionTypeSelected && item[unionField]) {
-                                unionTypeSelected = item[unionField];
-                                console.log(`🎯 Detected union type selection: ${unionTypeSelected}`);
+                            // Record union field & selection if present
+                            unionFieldsDetected.add(unionField);
+                            if (typeof item[unionField] === 'string') {
+                                unionSelections[unionField] = item[unionField];
+                                console.log(`🎯 Detected union type selection for ${unionField}: ${unionSelections[unionField]}`);
                             }
 
                             processed = true;
@@ -948,6 +962,12 @@ class JSONResponseBuilder {
                             }
                             nestedObjects[unionField][unionProp] = value;
                             console.log(`→ Created deep nested union field: ${unionField}.${unionProp} = ${value}`);
+                            // Record union field & selection if present
+                            unionFieldsDetected.add(unionField);
+                            if (typeof item[unionField] === 'string') {
+                                unionSelections[unionField] = item[unionField];
+                                console.log(`🎯 Detected union type selection for ${unionField}: ${unionSelections[unionField]}`);
+                            }
                             processed = true;
                             break;
                         } else if (pattern.type === 'nested_array_direct') {
@@ -1037,20 +1057,17 @@ class JSONResponseBuilder {
             }
         });
         
-        // Add union type discriminator if union fields were detected
-        // Add union type discriminator only if there is not already an object for the union field
-        if ((unionTypeSelected || (item.bike && typeof item.bike === 'string')) &&
-            !(cleanItem['bike'] && typeof cleanItem['bike'] === 'object') &&
-            !(nestedObjects['bike'] && typeof nestedObjects['bike'] === 'object')) {
-            const bikeType = unionTypeSelected || item.bike;
-            const bikeTypeMap = {
-                'rootmodel_mountainbike': 'MountainBike',
-                'rootmodel_roadbike': 'RoadBike', 
-                'rootmodel_electricbike': 'ElectricBike'
-            };
-            cleanItem['bike'] = bikeTypeMap[bikeType] || bikeType;
-            console.log(`🎯 Added union type discriminator: bike = ${cleanItem['bike']}`);
-        }
+        // Add union type discriminator(s) dynamically for any detected union fields
+        unionFieldsDetected.forEach((unionField) => {
+            const hasObjectAlready = (cleanItem[unionField] && typeof cleanItem[unionField] === 'object') ||
+                                     (nestedObjects[unionField] && typeof nestedObjects[unionField] === 'object');
+            const rawType = unionSelections[unionField] || (typeof item[unionField] === 'string' ? item[unionField] : null);
+            if (!hasObjectAlready && rawType) {
+                const formatted = formatUnionTypeLabel(rawType);
+                cleanItem[unionField] = formatted;
+                console.log(`🎯 Added union type discriminator: ${unionField} = ${formatted}`);
+            }
+        });
         
         // Merge nested objects back into the clean item
         Object.keys(nestedObjects).forEach(objKey => {
