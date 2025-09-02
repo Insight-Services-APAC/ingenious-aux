@@ -142,26 +142,7 @@ class PromptEvaluationCore {
                 }
             }
             
-            // Method 3: Use schema name to let JSONResponseBuilder handle it
-            if (app.currentSchema) {
-                console.log('⚠️ Falling back to schema name only, letting JSONResponseBuilder handle loading');
-                
-                try {
-                    // Let JSONResponseBuilder attempt to extract from cached data
-                    const containerName = JSONResponseBuilder.extractContainerFieldName(null, app.currentSchema);
-                    
-                    return {
-                        containerName: containerName,
-                        arrayFieldPatterns: [containerName], // Basic fallback
-                        fieldHierarchy: {},
-                        dynamicPatterns: [],
-                        schema: null
-                    };
-                } catch (nameError) {
-                    console.error('Schema name fallback failed:', nameError);
-                }
-            }
-            
+
             console.log('=== END getSchemaInfo DEBUG ===');
             
             // Last resort: This should not happen if everything is working correctly
@@ -174,15 +155,7 @@ class PromptEvaluationCore {
         }
     }
 
-    /**
-     * Load schema directly from schema file (fallback method) - DEPRECATED
-     * This method should no longer be used as all schema info should be extracted dynamically
-     */
-    static loadSchemaFromFile(schemaName) {
-        console.error('⚠️ loadSchemaFromFile called - this method is deprecated and should not be used');
-        console.error('Schema loading should be handled dynamically through JSONResponseBuilder.extractContainerFieldName');
-        throw new Error(`Deprecated method loadSchemaFromFile called for schema: ${schemaName}`);
-    }
+
 
     /**
      * Extract array field patterns from schema definitions
@@ -320,14 +293,6 @@ class PromptEvaluationCore {
             app.currentSchema, 
             fullSchemaObject || schemaInfo.schema
         );
-
-    // Return the full structure with user_prompt and conversation_flow
-    console.log('=== FORM DATA JSON (full) ===');
-    console.log('Raw form data:', formData);
-    console.log('Transformed data:', transformedData);
-    console.log('Formatted JSON structure:', formattedData);
-    console.log('JSON formatted:', JSON.stringify(formattedData, null, 2));
-    console.log('=== END FORM DATA ===');
     return formattedData;
     }
 
