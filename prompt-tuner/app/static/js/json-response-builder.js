@@ -497,19 +497,6 @@ class JSONResponseBuilder {
                                 console.log(`    🔗 Created reference nested pattern: ${actualArrayField}_N_${objName}_${refProp}`);
                             });
                         }
-                    } else if (Array.isArray(objStructure) && objStructure.length > 0) {
-                        // Handle simple nested object fields (legacy format)
-                        objStructure.forEach(fieldName => {
-                            const pattern = new RegExp(`^${actualArrayField.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}_\\d+_${objName}_${fieldName.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`);
-                            patterns.push({
-                                regex: pattern,
-                                arrayField: actualArrayField,
-                                nestedObject: objName,
-                                nestedProperty: fieldName,
-                                type: 'simple_nested'
-                            });
-                            console.log(`    🔗 Created simple nested pattern: ${actualArrayField}_N_${objName}_${fieldName}`);
-                        });
                     }
                 });
                 
@@ -1020,40 +1007,12 @@ class JSONResponseBuilder {
                 }
             }
             
-            // Fallback to legacy pattern matching if not processed by dynamic patterns
-            if (!processed && arrayFieldPatterns && arrayFieldPatterns.length > 0) {
-                console.log(`⚠️ Using fallback pattern matching for: ${key}`);
-                
-                // Create dynamic regex pattern from array field patterns
-                const escapedPatterns = arrayFieldPatterns.map(pattern => 
-                    pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-                );
-                const dynamicPrefixPattern = new RegExp(`^(?:${escapedPatterns.join('|')})_\\d+_(.+)$`);
-                
-                const prefixMatch = key.match(dynamicPrefixPattern);
-                if (prefixMatch) {
-                    cleanKey = prefixMatch[1];
-                    cleanItem[cleanKey] = value;
-                    console.log(`→ Legacy cleaned field name: ${key} -> ${cleanKey} = ${value}`);
-                    processed = true;
-                }
-            }
-            
+
             // Handle unprocessed fields
             if (!processed) {
-                // Handle customer_review fields specially (legacy support)
-                if (cleanKey.startsWith('customer_review_')) {
-                    const reviewField = cleanKey.replace('customer_review_', '');
-                    if (!nestedObjects.customer_review) {
-                        nestedObjects.customer_review = {};
-                    }
-                    nestedObjects.customer_review[reviewField] = value;
-                    console.log(`→ Created customer_review field: ${reviewField} = ${value}`);
-                } else {
-                    // Direct assignment for unprocessed fields
-                    cleanItem[cleanKey] = value;
-                    console.log(`→ Direct assignment: ${cleanKey} = ${value}`);
-                }
+                // Direct assignment for unprocessed fields
+                cleanItem[cleanKey] = value;
+                console.log(`→ Direct assignment: ${cleanKey} = ${value}`);
             }
         });
         
