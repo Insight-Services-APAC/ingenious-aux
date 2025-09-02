@@ -6,7 +6,8 @@ const API_CONFIG = {
         workflowsList: '/api/v1/workflows/list',
         promptView: '/api/v1/prompts/view', 
         promptUpdate: '/api/v1/prompts/update',
-        workflowSchemaRetriever: '/api/v1/custom-workflows/schema/{custom-workflow-name}'
+        workflowSchemaRetriever: '/api/v1/custom-workflows/schema/{custom-workflow-name}',
+        chat: '/api/v1/chat'
         // Add more endpoints as needed
     }
 };
