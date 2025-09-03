@@ -2,6 +2,11 @@
 
 A simple web application for managing and evaluating AI workflow prompts with an intuitive interface for version control, testing, and optimization.
 
+### **Alpha Stage Notice**
+
+> **IMPORTANT**: This Prompt Tuner application is currently in **alpha stage**. While the core functionality is operational and can be used locally, its functionality require thorough quality assurance (QA) with an actual custom workflow. 
+>
+
 ## Description
 
 The Prompt Tuner provides a centralized platform for managing prompt templates across your different AI workflows. It offers version management and evaluation capabilities. This application connects to backend APIs to fetch workflows, prompts, schemas and generates forms dynamically based on the workflow requirements.
