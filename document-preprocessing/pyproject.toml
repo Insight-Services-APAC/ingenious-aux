@@ -1,0 +1,107 @@
+[project]
+name = "ingenious-docprep"
+version = "0.1.0"
+description = "Standalone CLI tools for document preprocessing including chunking, extraction, and data preparation."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Insight Services APAC", email = "insight-services@apac.com"},
+]
+license = {text = "MIT"}
+keywords = ["document", "preprocessing", "chunking", "extraction", "cli", "rag"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    # Core CLI and utilities
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
+    "jsonlines>=4.0.0",
+    
+    # Document processing
+    "langchain-core>=0.1.0",
+    "langchain-text-splitters>=0.0.1",
+    "langchain-experimental>=0.0.1",
+    "langchain-openai>=0.0.1", 
+    "tiktoken>=0.5.0",
+    "requests>=2.28.0",
+    
+    # Text processing
+    "regex>=2023.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+docprep = "ingenious_docprep.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Insight-Services-APAC/ingenious-aux"
+Repository = "https://github.com/Insight-Services-APAC/ingenious-aux"
+Issues = "https://github.com/Insight-Services-APAC/ingenious-aux/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ingenious_docprep"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "W191",  # indentation contains tabs
+]
+
+[tool.black]
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
